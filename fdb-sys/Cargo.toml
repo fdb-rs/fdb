@@ -1,0 +1,17 @@
+[package]
+name = "fdb-sys"
+version = "0.1.0"
+edition = "2018"
+authors = ["fdb-rs Developers"]
+description = """
+Binding to the C APIs for FoundationDB
+"""
+
+[features]
+default = []
+fdb-6_3 = []
+
+[dependencies]
+
+[build-dependencies]
+bindgen = "0.59.0"

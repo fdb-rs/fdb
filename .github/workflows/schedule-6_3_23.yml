@@ -1,0 +1,35 @@
+name: schedule-6_3_23
+
+env:
+  image_version: 6_3_23
+  image_tag: bf3702eb91ef
+
+# We adjust the number of iterations in `schedule.sh` so that the job
+# takes approximately 1 hour to finish. Jobs are scheduled at minute
+# 30.
+on:
+  schedule:
+    - cron: '30 * * * *'
+
+jobs:
+  job-on-schedule:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v2
+      -
+        name: Pull ghcr.io/fdb-rs/fdb-${{ env.image_version }}:${{ env.image_tag }} container
+        run: |
+          sudo podman pull ghcr.io/fdb-rs/fdb-${{ env.image_version }}:${{ env.image_tag }}
+      -
+        name: Start container
+        run: |
+          sudo podman run --name fdb --volume ${GITHUB_WORKSPACE}:/home/runner/fdb --rm ghcr.io/fdb-rs/fdb-${{ env.image_version }}:${{ env.image_tag }} &
+      -
+        name: Run 6.3/schedule.sh
+        run: |
+          sudo podman exec --user runner:docker --workdir /home/runner/fdb/nix/ci --tty fdb nix develop .#schedule-6_3_23 --command ./6.3/schedule.sh
+      -
+        name: Stop container
+        run: |
+          sudo podman stop fdb

@@ -1,0 +1,32 @@
+[package]
+name = "fdb"
+version = "0.1.0"
+edition = "2018"
+authors = ["fdb-rs Developers"]
+
+description = """
+High level client bindings for FoundationDB using Tokio
+"""
+
+[features]
+default = []
+fdb-6_3 = ["fdb-gen/fdb-6_3", "fdb-sys/fdb-6_3"]
+
+[dependencies]
+bytes = "1"
+fdb-sys = { version = "0.1.0", path = "../fdb-sys", default-features = false }
+futures = "0.3"
+nom = "7"
+num-bigint = "0.4"
+num-traits = "0.2"
+parking_lot = "0.11"
+tokio = { version = "1", features = ["full"] }
+tokio-stream = "0.1"
+uuid = { version = "0.8", features = ["v4"] }
+
+[dev-dependencies]
+impls = "1"
+libc = "0.2"
+
+[build-dependencies]
+fdb-gen = { version = "0.1.0", path = "../fdb-gen", default-features = false }
