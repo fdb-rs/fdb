@@ -1,0 +1,42 @@
+name: pull_request-6_3_23
+
+env:
+  image_version: 6_3_23
+  image_tag: bf3702eb91ef
+
+on:
+  pull_request:
+    branches: ["main", "fdb-*.x"]
+
+jobs:
+  job-on-pull_request:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v2
+      -
+        name: Pull ghcr.io/fdb-rs/fdb-${{ env.image_version }}:${{ env.image_tag }} container
+        run: |
+          sudo podman pull ghcr.io/fdb-rs/fdb-${{ env.image_version }}:${{ env.image_tag }}
+      -
+        name: Start container
+        run: |
+          sudo podman run --name fdb --volume ${GITHUB_WORKSPACE}:/home/runner/fdb --rm ghcr.io/fdb-rs/fdb-${{ env.image_version }}:${{ env.image_tag }} &
+      -
+        name: Run 6.3/pull_request.sh
+        run: |
+          sudo podman exec --user runner:docker --workdir /home/runner/fdb/nix/ci --tty fdb nix develop .#pull_request-6_3_23 --command ./6.3/pull_request.sh
+      -
+        name: Run 6.3/pull_request_lcov.sh
+        run: |
+          sudo podman exec --user runner:docker --workdir /home/runner/fdb/nix/ci --tty fdb nix develop .#pull_request-nightly-6_3_23 --command ./6.3/pull_request_lcov.sh
+      -
+        name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          files: lcov.info
+          fail_ci_if_error: true
+      -
+        name: Stop container
+        run: |
+          sudo podman stop fdb

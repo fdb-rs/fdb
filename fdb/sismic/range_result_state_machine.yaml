@@ -1,0 +1,62 @@
+# NOTE: Even though there are two final states - Error and Done,
+#       plantuml shows it as one done state.
+statechart:
+  name: RangeResultStateMachine Statechart
+  preamble: |
+    **Context:** Root State
+    -----------------------
+    Immutable:
+      transaction
+      snapshot
+      mode
+      reverse
+
+    Mutable:
+      iteration
+      limit
+      begin_sel
+      end_sel
+    ---------------------------
+    **Context:** Fetching State
+    ---------------------------
+    Immutable:
+      fdb_future_key_value_array
+    -----------------------------------------
+    **Context:** KeyValueArrayAvailable State
+    -----------------------------------------
+    Immutable:
+      count
+      kvs
+      more
+
+    Mutable:
+      index
+    --------------------------------
+    **Context:** Error State (final)
+    --------------------------------
+    Immutable:
+      fdb_error
+  root state:
+    name: RangeResultStateMachine
+    initial: Fetching
+    states:
+      - name: Fetching
+        transitions:
+          - event: FetchOk{kvs, index, count, more}
+            target: KeyValueArrayAvailable
+            action: |
+              update limit, iteration, begin_sel, end_sel
+          - event: FetchDone
+            target: Done
+          - event: FetchError{fdb_error}
+            target: Error
+      - name: KeyValueArrayAvailable
+        transitions:
+          - event: FetchNextBatch{fdb_future_key_value_array}
+            target: Fetching
+          - event: FetchDone
+            target: Done
+      - name: Error
+        type: final
+      - name: Done
+        type: final

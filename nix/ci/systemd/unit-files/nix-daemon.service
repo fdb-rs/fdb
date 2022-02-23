@@ -1,0 +1,10 @@
+[Unit]
+Description=Nix Daemon
+ConditionPathIsReadWrite=/nix/var/nix/daemon-socket
+DefaultDependencies=no
+
+[Service]
+ExecStart=@@nix@/bin/nix-daemon nix-daemon --daemon
+Sockets=@nix_daemon_socket_name@
+KillMode=process
+Environment="NIX_SSL_CERT_FILE=@cacert@/etc/ssl/certs/ca-bundle.crt"

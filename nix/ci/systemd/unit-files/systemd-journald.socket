@@ -1,0 +1,7 @@
+[Unit]
+Description=Journal socket
+DefaultDependencies=no
+
+[Socket]
+ListenStream=/run/systemd/journal/stdout
+ListenDatagram=/run/systemd/journal/socket
