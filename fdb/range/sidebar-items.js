@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["StreamingMode","Options that control the way the Rust binding performs range reads."]],"struct":[["Range","[`Range`] describes an exact range of keyspace, specified by a begin and end key."],["RangeOptions","[`RangeOptions`] specify how a database range operation is carried out."]]});

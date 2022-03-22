@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["fdb"] = [{"text":"impl Stream for <a class=\"struct\" href=\"fdb/future/struct.FdbStreamKeyValue.html\" title=\"struct fdb::future::FdbStreamKeyValue\">FdbStreamKeyValue</a>","synthetic":false,"types":["fdb::future::FdbStreamKeyValue"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

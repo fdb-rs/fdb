@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["key_after","Computes the key that would sort immediately after `key`."],["starts_with","Checks if `key` starts with `prefix`."],["strinc","Computes the first key that would sort outside the range prefixed by `prefix`."]]});
