@@ -5,8 +5,9 @@ edition = "2018"
 authors = ["fdb-rs Developers"]
 
 description = """
-High level client bindings for FoundationDB using Tokio
+FoundationDB Client API for Tokio
 """
+license = "MIT OR Apache-2.0"
 
 [features]
 default = []
