@@ -1,12 +1,18 @@
 [package]
 name = "fdb-gen"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2018"
 authors = ["fdb-rs Developers"]
 description = """
 Binding generation helper for FoundationDB
 """
 license = "MIT OR Apache-2.0"
+repository = "https://github.com/fdb-rs/fdb"
+keywords = ["foundationdb", "tokio"]
+categories = ["database", "external-ffi-bindings"]
+
+[package.metadata.docs.rs]
+features = ["fdb-6_3"]
 
 [features]
 default = []
