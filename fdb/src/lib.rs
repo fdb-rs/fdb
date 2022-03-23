@@ -5,7 +5,7 @@
     unreachable_pub
 )]
 
-//! FoundationDB Client for Tokio
+//! FoundationDB Client API for Tokio
 
 mod fdb;
 mod key_value;

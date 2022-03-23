@@ -6,6 +6,7 @@ authors = ["fdb-rs Developers"]
 description = """
 Binding generation helper for FoundationDB
 """
+license = "MIT OR Apache-2.0"
 
 [features]
 default = []
