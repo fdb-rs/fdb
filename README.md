@@ -1,5 +1,16 @@
 # FoundationDB Client API for Tokio
 
+[![crates.io][crates-badge]][crates-url]
+[![codecov][codecov-badge]][codecov-url]
+[![build][build-badge]][build-url]
+
+[crates-badge]: https://img.shields.io/crates/v/fdb.svg
+[crates-url]: https://crates.io/crates/fdb
+[codecov-badge]: https://codecov.io/gh/fdb-rs/fdb/branch/main/graph/badge.svg?token=3O9VXRK4JU
+[codecov-url]: https://codecov.io/gh/fdb-rs/fdb
+[build-badge]: https://img.shields.io/github/workflow/status/fdb-rs/fdb/push-6_3_23
+[build-url]: https://github.com/fdb-rs/fdb/actions/workflows/push-6_3_23.yml
+
 ## License
 
 Licensed under either of
