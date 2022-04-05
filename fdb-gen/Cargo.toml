@@ -2,6 +2,7 @@
 name = "fdb-gen"
 version = "0.3.0"
 edition = "2018"
+rust-version = "1.49"
 authors = ["fdb-rs Developers"]
 description = """
 Binding generation helper for FoundationDB

@@ -11,6 +11,12 @@
 [build-badge]: https://img.shields.io/github/workflow/status/fdb-rs/fdb/push-6_3_23
 [build-url]: https://github.com/fdb-rs/fdb/actions/workflows/push-6_3_23.yml
 
+## Supported Rust Versions
+
+We follow Tokio project
+[MSRV](https://github.com/tokio-rs/tokio/#supported-rust-versions)
+(minimum supported rust version) policy. The current MSRV is 1.49.0.
+
 ## License
 
 Licensed under either of
