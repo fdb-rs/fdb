@@ -6,6 +6,11 @@
 )]
 
 //! FoundationDB Client API for Tokio
+//!
+//! Guide level documentation is on our [website]. You will find API
+//! level documentation here.
+//!
+//! [website]: https://fdb-rs.github.io/docs/getting-started/introduction/
 
 mod fdb;
 mod key_value;

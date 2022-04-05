@@ -11,6 +11,18 @@
 [build-badge]: https://img.shields.io/github/workflow/status/fdb-rs/fdb/push-6_3_23
 [build-url]: https://github.com/fdb-rs/fdb/actions/workflows/push-6_3_23.yml
 
+## Getting Help
+
+First, see if the answer to your question can be found in the
+[Guides](https://fdb-rs.github.io/docs/getting-started/introduction/)
+or the [API documentation](https://docs.rs/fdb/latest/fdb/). If the
+answer is not there, you can [contact
+us](https://fdb-rs.github.io/docs/help/contact-us/). We would be happy
+to try to answer your question.
+
+You can find `main` branch API doumentation
+[here](https://fdb-rs.github.io/fdb/fdb/).
+
 ## Supported Rust Versions
 
 We follow Tokio project
