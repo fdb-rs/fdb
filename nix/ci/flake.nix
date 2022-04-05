@@ -171,7 +171,7 @@
           llvmPackages.libcxxClang
           openssl
           pkgconfig
-          (rust-bin.nightly."2022-03-01".default.override {
+          (rust-bin.nightly."2022-04-03".default.override {
             extensions = [
               "llvm-tools-preview"
             ];
@@ -251,7 +251,7 @@
           llvmPackages.libcxxClang
           openssl
           pkgconfig
-          (rust-bin.nightly."2022-03-01".default.override {
+          (rust-bin.nightly."2022-04-03".default.override {
             extensions = [
               "llvm-tools-preview"
             ];
