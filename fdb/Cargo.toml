@@ -1,6 +1,6 @@
 [package]
 name = "fdb"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2018"
 authors = ["fdb-rs Developers"]
 
@@ -21,7 +21,7 @@ fdb-6_3 = ["fdb-gen/fdb-6_3", "fdb-sys/fdb-6_3"]
 
 [dependencies]
 bytes = "1"
-fdb-sys = { version = "0.2.0", path = "../fdb-sys", default-features = false }
+fdb-sys = { version = "0.3.0", path = "../fdb-sys", default-features = false }
 futures = "0.3"
 nom = "7"
 num-bigint = "0.4"
@@ -36,4 +36,4 @@ impls = "1"
 libc = "0.2"
 
 [build-dependencies]
-fdb-gen = { version = "0.2.0", path = "../fdb-gen", default-features = false }
+fdb-gen = { version = "0.3.0", path = "../fdb-gen", default-features = false }
