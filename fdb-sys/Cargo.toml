@@ -2,6 +2,7 @@
 name = "fdb-sys"
 version = "0.2.0"
 edition = "2018"
+rust-version = "1.49"
 authors = ["fdb-rs Developers"]
 description = """
 Binding to the C APIs for FoundationDB
