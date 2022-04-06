@@ -2,7 +2,7 @@ name: push-rustdoc-6_3_23
 
 env:
   image_version: 6_3_23
-  image_tag: bf3702eb91ef
+  image_tag: abf0816e3ceb
 
 on:
   push:
