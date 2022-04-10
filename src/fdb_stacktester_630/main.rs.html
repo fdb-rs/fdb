@@ -2358,41 +2358,6 @@
 <span id="2356">2356</span>
 <span id="2357">2357</span>
 <span id="2358">2358</span>
-<span id="2359">2359</span>
-<span id="2360">2360</span>
-<span id="2361">2361</span>
-<span id="2362">2362</span>
-<span id="2363">2363</span>
-<span id="2364">2364</span>
-<span id="2365">2365</span>
-<span id="2366">2366</span>
-<span id="2367">2367</span>
-<span id="2368">2368</span>
-<span id="2369">2369</span>
-<span id="2370">2370</span>
-<span id="2371">2371</span>
-<span id="2372">2372</span>
-<span id="2373">2373</span>
-<span id="2374">2374</span>
-<span id="2375">2375</span>
-<span id="2376">2376</span>
-<span id="2377">2377</span>
-<span id="2378">2378</span>
-<span id="2379">2379</span>
-<span id="2380">2380</span>
-<span id="2381">2381</span>
-<span id="2382">2382</span>
-<span id="2383">2383</span>
-<span id="2384">2384</span>
-<span id="2385">2385</span>
-<span id="2386">2386</span>
-<span id="2387">2387</span>
-<span id="2388">2388</span>
-<span id="2389">2389</span>
-<span id="2390">2390</span>
-<span id="2391">2391</span>
-<span id="2392">2392</span>
-<span id="2393">2393</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">bytes</span>::{<span class="ident">Buf</span>, <span class="ident">BufMut</span>, <span class="ident">Bytes</span>, <span class="ident">BytesMut</span>};
 
 <span class="kw">use</span> <span class="ident">dashmap::DashMap</span>;
@@ -2649,20 +2614,19 @@
 
         <span class="kw">let</span> <span class="ident">kvs</span> <span class="op">=</span> <span class="ident">db</span>
             .<span class="ident">read</span>(<span class="op">|</span><span class="ident">tr</span><span class="op">|</span> <span class="kw">async</span> <span class="kw">move</span> {
-                <span class="kw">let</span> <span class="ident">ops_range</span> <span class="op">=</span> {
-                    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tup</span> <span class="op">=</span> <span class="ident">Tuple::new</span>();
-                    <span class="ident">tup</span>.<span class="ident">add_bytes</span>(<span class="ident">prefix_clone_ref</span>.<span class="ident">clone</span>());
-                    <span class="ident">tup</span>
-                }
-                .<span class="ident">range</span>(<span class="ident">Bytes::new</span>());
-
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
 
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">range_stream</span> <span class="op">=</span> <span class="ident">tr</span>.<span class="ident">get_range</span>(
-                    <span class="ident">KeySelector::first_greater_or_equal</span>(<span class="ident">ops_range</span>.<span class="ident">begin</span>().<span class="ident">clone</span>()),
-                    <span class="ident">KeySelector::first_greater_or_equal</span>(<span class="ident">ops_range</span>.<span class="ident">end</span>().<span class="ident">clone</span>()),
-                    <span class="ident">RangeOptions::default</span>(),
-                );
+                <span class="kw">let</span> <span class="ident">ops_tup</span>: (<span class="ident">Bytes</span>,) <span class="op">=</span> (<span class="ident">prefix_clone_ref</span>.<span class="ident">clone</span>(),);
+
+                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">range_stream</span> <span class="op">=</span> {
+                    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tup</span> <span class="op">=</span> <span class="ident">Tuple::new</span>();
+
+                    <span class="ident">tup</span>.<span class="ident">add_bytes</span>(<span class="ident">ops_tup</span>.<span class="number">0</span>);
+
+                    <span class="ident">tup</span>
+                }
+                .<span class="ident">range</span>(<span class="ident">Bytes::new</span>())
+                .<span class="ident">into_stream</span>(<span class="kw-2">&amp;</span><span class="ident">tr</span>, <span class="ident">RangeOptions::default</span>());
 
                 <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">x</span>) <span class="op">=</span> <span class="ident">range_stream</span>.<span class="ident">next</span>().<span class="kw">await</span> {
                     <span class="kw">let</span> <span class="ident">kv</span> <span class="op">=</span> <span class="ident">x</span><span class="question-mark">?</span>;
@@ -3637,23 +3601,11 @@
 		    <span class="comment">// limit, reverse, mode gets popped here.</span>
 		    <span class="kw">let</span> <span class="ident">range_options</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">pop_range_options</span>().<span class="kw">await</span>;
 
-		    <span class="kw">let</span> <span class="ident">begin_key_selector</span> <span class="op">=</span> <span class="ident">KeySelector::first_greater_or_equal</span>(
-			<span class="ident">key_range</span>.<span class="ident">begin</span>().<span class="ident">clone</span>()
-		    );
-		    <span class="kw">let</span> <span class="ident">end_key_selector</span> <span class="op">=</span> <span class="ident">KeySelector::first_greater_or_equal</span>(
-			<span class="ident">key_range</span>.<span class="ident">end</span>().<span class="ident">clone</span>()
-		    );
-
-                    <span class="kw">let</span> <span class="ident">begin_key_selector_ref</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">begin_key_selector</span>;
-                    <span class="kw">let</span> <span class="ident">end_key_selector_ref</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">end_key_selector</span>;
+		    <span class="kw">let</span> <span class="ident">key_range_ref</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">key_range</span>;
                     <span class="kw">let</span> <span class="ident">range_options_ref</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">range_options</span>;
 
                     <span class="kw">let</span> <span class="ident">fn_mut_closure_t</span> <span class="op">=</span> <span class="op">|</span><span class="ident">t</span>: <span class="ident">FdbTransaction</span><span class="op">|</span> <span class="kw">async</span> <span class="kw">move</span> {
-                        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">range_stream</span> <span class="op">=</span> <span class="ident">t</span>.<span class="ident">get_range</span>(
-                            <span class="ident">begin_key_selector_ref</span>.<span class="ident">clone</span>(),
-                            <span class="ident">end_key_selector_ref</span>.<span class="ident">clone</span>(),
-                            <span class="ident">range_options_ref</span>.<span class="ident">clone</span>(),
-                        );
+                        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">range_stream</span> <span class="op">=</span> <span class="ident">key_range_ref</span>.<span class="ident">clone</span>().<span class="ident">into_stream</span>(<span class="kw-2">&amp;</span><span class="ident">t</span>, <span class="ident">range_options_ref</span>.<span class="ident">clone</span>());
 
                         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
 
@@ -3666,10 +3618,8 @@
                     };
 
                     <span class="kw">let</span> <span class="ident">fn_mut_closure_rt</span> <span class="op">=</span> <span class="op">|</span><span class="ident">rt</span>: <span class="ident">FdbReadTransaction</span><span class="op">|</span> <span class="kw">async</span> <span class="kw">move</span> {
-                        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">range_stream</span> <span class="op">=</span> <span class="ident">rt</span>.<span class="ident">get_range</span>(
-                            <span class="ident">begin_key_selector_ref</span>.<span class="ident">clone</span>(),
-                            <span class="ident">end_key_selector_ref</span>.<span class="ident">clone</span>(),
-                            <span class="ident">range_options_ref</span>.<span class="ident">clone</span>(),
+                        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">range_stream</span> <span class="op">=</span> <span class="ident">key_range_ref</span>.<span class="ident">clone</span>().<span class="ident">into_stream</span>(<span class="kw-2">&amp;</span><span class="ident">rt</span>,
+                            <span class="ident">range_options_ref</span>.<span class="ident">clone</span>()
                         );
 
                         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
@@ -3705,23 +3655,11 @@
 
 		    <span class="kw">let</span> <span class="ident">key_range</span> <span class="op">=</span> <span class="ident">Range::starts_with</span>(<span class="ident">prefix</span>);
 
-		    <span class="kw">let</span> <span class="ident">begin_key_selector</span> <span class="op">=</span> <span class="ident">KeySelector::first_greater_or_equal</span>(
-			<span class="ident">key_range</span>.<span class="ident">begin</span>().<span class="ident">clone</span>()
-		    );
-		    <span class="kw">let</span> <span class="ident">end_key_selector</span> <span class="op">=</span> <span class="ident">KeySelector::first_greater_or_equal</span>(
-			<span class="ident">key_range</span>.<span class="ident">end</span>().<span class="ident">clone</span>()
-		    );
-
-                    <span class="kw">let</span> <span class="ident">begin_key_selector_ref</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">begin_key_selector</span>;
-                    <span class="kw">let</span> <span class="ident">end_key_selector_ref</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">end_key_selector</span>;
                     <span class="kw">let</span> <span class="ident">range_options_ref</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">range_options</span>;
+		    <span class="kw">let</span> <span class="ident">key_range_ref</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">key_range</span>;
 
                     <span class="kw">let</span> <span class="ident">fn_mut_closure_t</span> <span class="op">=</span> <span class="op">|</span><span class="ident">t</span>: <span class="ident">FdbTransaction</span><span class="op">|</span> <span class="kw">async</span> <span class="kw">move</span> {
-                        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">range_stream</span> <span class="op">=</span> <span class="ident">t</span>.<span class="ident">get_range</span>(
-                            <span class="ident">begin_key_selector_ref</span>.<span class="ident">clone</span>(),
-                            <span class="ident">end_key_selector_ref</span>.<span class="ident">clone</span>(),
-                            <span class="ident">range_options_ref</span>.<span class="ident">clone</span>(),
-                        );
+                        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">range_stream</span> <span class="op">=</span> <span class="ident">key_range_ref</span>.<span class="ident">clone</span>().<span class="ident">into_stream</span>(<span class="kw-2">&amp;</span><span class="ident">t</span>, <span class="ident">range_options_ref</span>.<span class="ident">clone</span>());
 
                         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
 
@@ -3734,11 +3672,7 @@
                     };
 
                     <span class="kw">let</span> <span class="ident">fn_mut_closure_rt</span> <span class="op">=</span> <span class="op">|</span><span class="ident">rt</span>: <span class="ident">FdbReadTransaction</span><span class="op">|</span> <span class="kw">async</span> <span class="kw">move</span> {
-                        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">range_stream</span> <span class="op">=</span> <span class="ident">rt</span>.<span class="ident">get_range</span>(
-                            <span class="ident">begin_key_selector_ref</span>.<span class="ident">clone</span>(),
-                            <span class="ident">end_key_selector_ref</span>.<span class="ident">clone</span>(),
-                            <span class="ident">range_options_ref</span>.<span class="ident">clone</span>(),
-                        );
+                        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">range_stream</span> <span class="op">=</span> <span class="ident">key_range_ref</span>.<span class="ident">clone</span>().<span class="ident">into_stream</span>(<span class="kw-2">&amp;</span><span class="ident">rt</span>, <span class="ident">range_options_ref</span>.<span class="ident">clone</span>());
 
                         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
 
@@ -4008,11 +3942,7 @@
 		    <span class="kw">let</span> <span class="ident">prefix_range_ref</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">prefix_range</span>;
 
 		    <span class="kw">match</span> <span class="self">self</span>.<span class="ident">db</span>.<span class="ident">run</span>(<span class="op">|</span><span class="ident">tr</span><span class="op">|</span> <span class="kw">async</span> <span class="kw">move</span> {
-			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">range_stream</span> <span class="op">=</span> <span class="ident">tr</span>.<span class="ident">get_range</span>(
-			    <span class="ident">KeySelector::first_greater_or_equal</span>(<span class="ident">prefix_range_ref</span>.<span class="ident">begin</span>().<span class="ident">clone</span>()),
-			    <span class="ident">KeySelector::first_greater_or_equal</span>(<span class="ident">prefix_range_ref</span>.<span class="ident">end</span>().<span class="ident">clone</span>()),
-			    <span class="ident">RangeOptions::default</span>(),
-			);
+			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">range_stream</span> <span class="op">=</span> <span class="ident">prefix_range_ref</span>.<span class="ident">clone</span>().<span class="ident">into_stream</span>(<span class="kw-2">&amp;</span><span class="ident">tr</span>, <span class="ident">RangeOptions::default</span>());
 
 			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
 
