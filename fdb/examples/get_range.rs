@@ -66,10 +66,25 @@ fn main() -> Result<(), Box<dyn Error>> {
                     );
                 }
 
+                println!();
+
+                let mut range_stream = Range::new(Bytes::new(), Bytes::from_static(b"\xFF"))
+                    .into_stream(&tr, RangeOptions::default());
+
+                while let Some(x) = range_stream.next().await {
+                    let kv = x?;
+                    println!(
+                        "{} is {}",
+                        String::from_utf8_lossy(&Bytes::from(kv.get_key().clone())[..]),
+                        String::from_utf8_lossy(&Bytes::from(kv.get_value().clone())[..])
+                    );
+                }
+
                 Ok(())
             })
             .await?;
 
+        println!();
         println!("snapshot range read");
 
         fdb_database
@@ -79,6 +94,20 @@ fn main() -> Result<(), Box<dyn Error>> {
                     KeySelector::first_greater_or_equal(Bytes::from_static(b"\xFF")),
                     RangeOptions::default(),
                 );
+
+                while let Some(x) = range_stream.next().await {
+                    let kv = x?;
+                    println!(
+                        "{} is {}",
+                        String::from_utf8_lossy(&Bytes::from(kv.get_key().clone())[..]),
+                        String::from_utf8_lossy(&Bytes::from(kv.get_value().clone())[..])
+                    );
+                }
+
+                println!();
+
+                let mut range_stream = Range::new(Bytes::new(), Bytes::from_static(b"\xFF"))
+                    .into_stream(&tr, RangeOptions::default());
 
                 while let Some(x) = range_stream.next().await {
                     let kv = x?;

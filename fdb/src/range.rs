@@ -8,8 +8,8 @@ use std::pin::Pin;
 use std::task::{Context, Poll};
 
 use crate::error::{FdbError, FdbResult};
-use crate::future::{FdbFuture, FdbFutureKeyValueArray};
-use crate::transaction::FdbTransaction;
+use crate::future::{FdbFuture, FdbFutureKeyValueArray, FdbStreamKeyValue};
+use crate::transaction::{FdbTransaction, ReadTransaction};
 use crate::tuple::key_util;
 use crate::{Key, KeySelector, KeyValue};
 
@@ -60,6 +60,24 @@ impl Range {
     /// Return the end of the range.
     pub fn end(&self) -> &Key {
         &self.end
+    }
+
+    /// Gets an ordered range of keys and values from the database.
+    ///
+    /// The returned [`FdbStreamKeyValue`] implements [`Stream`] trait
+    /// that yields a [`KeyValue`] item.
+    ///
+    /// [`Stream`]: futures::Stream
+    pub fn into_stream<T>(self, rt: &T, options: RangeOptions) -> FdbStreamKeyValue
+    where
+        T: ReadTransaction,
+    {
+        let (begin_key, end_key) = self.deconstruct();
+
+        let begin_key_selector = KeySelector::first_greater_or_equal(begin_key);
+        let end_key_selector = KeySelector::first_greater_or_equal(end_key);
+
+        rt.get_range(begin_key_selector, end_key_selector, options)
     }
 
     pub(crate) fn deconstruct(self) -> (Key, Key) {

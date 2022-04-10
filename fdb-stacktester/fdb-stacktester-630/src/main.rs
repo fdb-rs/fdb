@@ -254,20 +254,19 @@ impl StackMachine {
 
         let kvs = db
             .read(|tr| async move {
-                let ops_range = {
-                    let mut tup = Tuple::new();
-                    tup.add_bytes(prefix_clone_ref.clone());
-                    tup
-                }
-                .range(Bytes::new());
-
                 let mut res = Vec::new();
 
-                let mut range_stream = tr.get_range(
-                    KeySelector::first_greater_or_equal(ops_range.begin().clone()),
-                    KeySelector::first_greater_or_equal(ops_range.end().clone()),
-                    RangeOptions::default(),
-                );
+                let ops_tup: (Bytes,) = (prefix_clone_ref.clone(),);
+
+                let mut range_stream = {
+                    let mut tup = Tuple::new();
+
+                    tup.add_bytes(ops_tup.0);
+
+                    tup
+                }
+                .range(Bytes::new())
+                .into_stream(&tr, RangeOptions::default());
 
                 while let Some(x) = range_stream.next().await {
                     let kv = x?;
@@ -1242,23 +1241,11 @@ impl StackMachine {
 		    // limit, reverse, mode gets popped here.
 		    let range_options = self.pop_range_options().await;
 
-		    let begin_key_selector = KeySelector::first_greater_or_equal(
-			key_range.begin().clone()
-		    );
-		    let end_key_selector = KeySelector::first_greater_or_equal(
-			key_range.end().clone()
-		    );
-
-                    let begin_key_selector_ref = &begin_key_selector;
-                    let end_key_selector_ref = &end_key_selector;
+		    let key_range_ref = &key_range;
                     let range_options_ref = &range_options;
 
                     let fn_mut_closure_t = |t: FdbTransaction| async move {
-                        let mut range_stream = t.get_range(
-                            begin_key_selector_ref.clone(),
-                            end_key_selector_ref.clone(),
-                            range_options_ref.clone(),
-                        );
+                        let mut range_stream = key_range_ref.clone().into_stream(&t, range_options_ref.clone());
 
                         let mut res = Vec::new();
 
@@ -1271,10 +1258,8 @@ impl StackMachine {
                     };
 
                     let fn_mut_closure_rt = |rt: FdbReadTransaction| async move {
-                        let mut range_stream = rt.get_range(
-                            begin_key_selector_ref.clone(),
-                            end_key_selector_ref.clone(),
-                            range_options_ref.clone(),
+                        let mut range_stream = key_range_ref.clone().into_stream(&rt,
+                            range_options_ref.clone()
                         );
 
                         let mut res = Vec::new();
@@ -1310,23 +1295,11 @@ impl StackMachine {
 
 		    let key_range = Range::starts_with(prefix);
 
-		    let begin_key_selector = KeySelector::first_greater_or_equal(
-			key_range.begin().clone()
-		    );
-		    let end_key_selector = KeySelector::first_greater_or_equal(
-			key_range.end().clone()
-		    );
-
-                    let begin_key_selector_ref = &begin_key_selector;
-                    let end_key_selector_ref = &end_key_selector;
                     let range_options_ref = &range_options;
+		    let key_range_ref = &key_range;
 
                     let fn_mut_closure_t = |t: FdbTransaction| async move {
-                        let mut range_stream = t.get_range(
-                            begin_key_selector_ref.clone(),
-                            end_key_selector_ref.clone(),
-                            range_options_ref.clone(),
-                        );
+                        let mut range_stream = key_range_ref.clone().into_stream(&t, range_options_ref.clone());
 
                         let mut res = Vec::new();
 
@@ -1339,11 +1312,7 @@ impl StackMachine {
                     };
 
                     let fn_mut_closure_rt = |rt: FdbReadTransaction| async move {
-                        let mut range_stream = rt.get_range(
-                            begin_key_selector_ref.clone(),
-                            end_key_selector_ref.clone(),
-                            range_options_ref.clone(),
-                        );
+                        let mut range_stream = key_range_ref.clone().into_stream(&rt, range_options_ref.clone());
 
                         let mut res = Vec::new();
 
@@ -1613,11 +1582,7 @@ impl StackMachine {
 		    let prefix_range_ref = &prefix_range;
 
 		    match self.db.run(|tr| async move {
-			let mut range_stream = tr.get_range(
-			    KeySelector::first_greater_or_equal(prefix_range_ref.begin().clone()),
-			    KeySelector::first_greater_or_equal(prefix_range_ref.end().clone()),
-			    RangeOptions::default(),
-			);
+			let mut range_stream = prefix_range_ref.clone().into_stream(&tr, RangeOptions::default());
 
 			let mut res = Vec::new();
 
