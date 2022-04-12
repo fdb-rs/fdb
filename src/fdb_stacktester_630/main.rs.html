@@ -2358,6 +2358,7 @@
 <span id="2356">2356</span>
 <span id="2357">2357</span>
 <span id="2358">2358</span>
+<span id="2359">2359</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">bytes</span>::{<span class="ident">Buf</span>, <span class="ident">BufMut</span>, <span class="ident">Bytes</span>, <span class="ident">BytesMut</span>};
 
 <span class="kw">use</span> <span class="ident">dashmap::DashMap</span>;
@@ -2648,7 +2649,7 @@
         );
 
         <span class="kw">for</span> (<span class="ident">inst_number</span>, <span class="ident">kv</span>) <span class="kw">in</span> <span class="ident">kvs</span>.<span class="ident">into_iter</span>().<span class="ident">enumerate</span>() {
-            <span class="kw">let</span> <span class="ident">inst</span> <span class="op">=</span> <span class="ident">Tuple::from_bytes</span>(<span class="ident">kv</span>.<span class="ident">get_value</span>().<span class="ident">clone</span>()).<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="ident">err</span><span class="op">|</span> {
+            <span class="kw">let</span> <span class="ident">inst</span> <span class="op">=</span> <span class="ident">Tuple::from_bytes</span>(<span class="ident">kv</span>.<span class="ident">into_value</span>()).<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="ident">err</span><span class="op">|</span> {
                 <span class="macro">panic!</span>(<span class="string">&quot;Error occurred during `Tuple::from_bytes`: {:?}&quot;</span>, <span class="ident">err</span>)
             });
             <span class="ident">sm</span>.<span class="ident">process_inst</span>(<span class="ident">inst_number</span>, <span class="ident">inst</span>).<span class="kw">await</span>;
@@ -4361,16 +4362,17 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tup</span> <span class="op">=</span> <span class="ident">Tuple::new</span>();
 
         <span class="kw">for</span> <span class="ident">kv</span> <span class="kw">in</span> <span class="ident">kvs</span> {
+            <span class="kw">let</span> (<span class="ident">key</span>, <span class="ident">value</span>) <span class="op">=</span> <span class="ident">kv</span>.<span class="ident">into_parts</span>();
             <span class="kw">match</span> <span class="ident">prefix_filter</span> {
                 <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">p</span>) =&gt; {
-                    <span class="kw">if</span> <span class="ident">key_util::starts_with</span>(<span class="ident">kv</span>.<span class="ident">get_key</span>().<span class="ident">clone</span>(), <span class="ident">p</span>.<span class="ident">clone</span>()) {
-                        <span class="ident">tup</span>.<span class="ident">add_bytes</span>(<span class="ident">kv</span>.<span class="ident">get_key</span>().<span class="ident">clone</span>().<span class="ident">into</span>());
-                        <span class="ident">tup</span>.<span class="ident">add_bytes</span>(<span class="ident">kv</span>.<span class="ident">get_value</span>().<span class="ident">clone</span>().<span class="ident">into</span>());
+                    <span class="kw">if</span> <span class="ident">key_util::starts_with</span>(<span class="ident">key</span>.<span class="ident">clone</span>(), <span class="ident">p</span>.<span class="ident">clone</span>()) {
+                        <span class="ident">tup</span>.<span class="ident">add_bytes</span>(<span class="ident">key</span>.<span class="ident">into</span>());
+                        <span class="ident">tup</span>.<span class="ident">add_bytes</span>(<span class="ident">value</span>.<span class="ident">into</span>());
                     }
                 }
                 <span class="prelude-val">None</span> =&gt; {
-                    <span class="ident">tup</span>.<span class="ident">add_bytes</span>(<span class="ident">kv</span>.<span class="ident">get_key</span>().<span class="ident">clone</span>().<span class="ident">into</span>());
-                    <span class="ident">tup</span>.<span class="ident">add_bytes</span>(<span class="ident">kv</span>.<span class="ident">get_value</span>().<span class="ident">clone</span>().<span class="ident">into</span>());
+                    <span class="ident">tup</span>.<span class="ident">add_bytes</span>(<span class="ident">key</span>.<span class="ident">into</span>());
+                    <span class="ident">tup</span>.<span class="ident">add_bytes</span>(<span class="ident">value</span>.<span class="ident">into</span>());
                 }
             }
         }

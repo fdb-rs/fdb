@@ -533,7 +533,7 @@
             <span class="ident">res</span>.<span class="ident">push</span>({
                 <span class="comment">// `13` because that is the length of</span>
                 <span class="comment">// `&quot;\xFF/keyServers/&quot;`.</span>
-                <span class="ident">Into</span>::<span class="op">&lt;</span><span class="ident">Key</span><span class="op">&gt;</span><span class="ident">::into</span>(<span class="ident">Into</span>::<span class="op">&lt;</span><span class="ident">Bytes</span><span class="op">&gt;</span><span class="ident">::into</span>(<span class="ident">kv</span>.<span class="ident">get_key</span>().<span class="ident">clone</span>()).<span class="ident">slice</span>(<span class="number">13</span>..))
+                <span class="ident">Into</span>::<span class="op">&lt;</span><span class="ident">Key</span><span class="op">&gt;</span><span class="ident">::into</span>(<span class="ident">Into</span>::<span class="op">&lt;</span><span class="ident">Bytes</span><span class="op">&gt;</span><span class="ident">::into</span>(<span class="ident">kv</span>.<span class="ident">into_key</span>()).<span class="ident">slice</span>(<span class="number">13</span>..))
             });
         }
 

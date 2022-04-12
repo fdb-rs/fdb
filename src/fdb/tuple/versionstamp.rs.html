@@ -340,11 +340,6 @@
 <span id="338">338</span>
 <span id="339">339</span>
 <span id="340">340</span>
-<span id="341">341</span>
-<span id="342">342</span>
-<span id="343">343</span>
-<span id="344">344</span>
-<span id="345">345</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">bytes</span>::{<span class="ident">Buf</span>, <span class="ident">BufMut</span>};
 <span class="kw">use</span> <span class="ident">bytes</span>::{<span class="ident">Bytes</span>, <span class="ident">BytesMut</span>};
 
@@ -429,18 +424,13 @@
 <span class="doccomment">///</span>
 <span class="doccomment">///         let subspace_range = subspace.range(&amp;Tuple::new());</span>
 <span class="doccomment">///</span>
-<span class="doccomment">///         let key = tr</span>
-<span class="doccomment">///             .get_range(</span>
-<span class="doccomment">///                 KeySelector::first_greater_or_equal(subspace_range.begin().clone()),</span>
-<span class="doccomment">///                 KeySelector::first_greater_or_equal(subspace_range.end().clone()),</span>
-<span class="doccomment">///                 RangeOptions::default(),</span>
-<span class="doccomment">///             )</span>
+<span class="doccomment">///         let key = subspace_range</span>
+<span class="doccomment">///             .into_stream(&amp;tr, RangeOptions::default())</span>
 <span class="doccomment">///             .take(1)</span>
 <span class="doccomment">///             .next()</span>
 <span class="doccomment">///             .await</span>
 <span class="doccomment">///             .unwrap()?</span>
-<span class="doccomment">///             .get_key()</span>
-<span class="doccomment">///             .clone();</span>
+<span class="doccomment">///             .into_key();</span>
 <span class="doccomment">///</span>
 <span class="doccomment">///         Ok(subspace</span>
 <span class="doccomment">///             .unpack(&amp;key.into())?</span>

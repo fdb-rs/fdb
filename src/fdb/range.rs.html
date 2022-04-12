@@ -593,6 +593,7 @@
 <span id="591">591</span>
 <span id="592">592</span>
 <span id="593">593</span>
+<span id="594">594</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Provides types for working with FDB range.</span>
 
 <span class="kw">use</span> <span class="ident">bytes::Bytes</span>;
@@ -1071,11 +1072,12 @@
 
                         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">reverse</span> {
                             <span class="self">self</span>.<span class="ident">end_sel</span> <span class="op">=</span> <span class="ident">KeySelector::first_greater_or_equal</span>(
-                                <span class="ident">kvs</span>[<span class="ident">last_index</span>].<span class="ident">get_key</span>().<span class="ident">clone</span>(),
+                                <span class="ident">kvs</span>[<span class="ident">last_index</span>].<span class="ident">get_key_ref</span>().<span class="ident">clone</span>(),
                             );
                         } <span class="kw">else</span> {
-                            <span class="self">self</span>.<span class="ident">begin_sel</span> <span class="op">=</span>
-                                <span class="ident">KeySelector::first_greater_than</span>(<span class="ident">kvs</span>[<span class="ident">last_index</span>].<span class="ident">get_key</span>().<span class="ident">clone</span>());
+                            <span class="self">self</span>.<span class="ident">begin_sel</span> <span class="op">=</span> <span class="ident">KeySelector::first_greater_than</span>(
+                                <span class="ident">kvs</span>[<span class="ident">last_index</span>].<span class="ident">get_key_ref</span>().<span class="ident">clone</span>(),
+                            );
                         }
                     }
 
