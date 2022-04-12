@@ -288,7 +288,7 @@ impl StackMachine {
         );
 
         for (inst_number, kv) in kvs.into_iter().enumerate() {
-            let inst = Tuple::from_bytes(kv.get_value().clone()).unwrap_or_else(|err| {
+            let inst = Tuple::from_bytes(kv.into_value()).unwrap_or_else(|err| {
                 panic!("Error occurred during `Tuple::from_bytes`: {:?}", err)
             });
             sm.process_inst(inst_number, inst).await;
@@ -2001,16 +2001,17 @@ impl StackMachine {
         let mut tup = Tuple::new();
 
         for kv in kvs {
+            let (key, value) = kv.into_parts();
             match prefix_filter {
                 Some(ref p) => {
-                    if key_util::starts_with(kv.get_key().clone(), p.clone()) {
-                        tup.add_bytes(kv.get_key().clone().into());
-                        tup.add_bytes(kv.get_value().clone().into());
+                    if key_util::starts_with(key.clone(), p.clone()) {
+                        tup.add_bytes(key.into());
+                        tup.add_bytes(value.into());
                     }
                 }
                 None => {
-                    tup.add_bytes(kv.get_key().clone().into());
-                    tup.add_bytes(kv.get_value().clone().into());
+                    tup.add_bytes(key.into());
+                    tup.add_bytes(value.into());
                 }
             }
         }

@@ -131,7 +131,7 @@ impl FdbDatabase {
             res.push({
                 // `13` because that is the length of
                 // `"\xFF/keyServers/"`.
-                Into::<Key>::into(Into::<Bytes>::into(kv.get_key().clone()).slice(13..))
+                Into::<Key>::into(Into::<Bytes>::into(kv.into_key()).slice(13..))
             });
         }
 

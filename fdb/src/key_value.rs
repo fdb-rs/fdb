@@ -49,14 +49,29 @@ pub struct KeyValue {
 }
 
 impl KeyValue {
-    /// Gets the key from [`KeyValue`].
-    pub fn get_key(&self) -> &Key {
+    /// Gets a reference to [`Key`] from [`KeyValue`].
+    pub fn get_key_ref(&self) -> &Key {
         &self.key
     }
 
-    /// Gets the value from [`KeyValue`].
-    pub fn get_value(&self) -> &Value {
+    /// Gets a reference to [`Value`] from [`KeyValue`].
+    pub fn get_value_ref(&self) -> &Value {
         &self.value
+    }
+
+    /// Extract [`Key`] from [`KeyValue`].
+    pub fn into_key(self) -> Key {
+        self.key
+    }
+
+    /// Extract [`Value`] from [`KeyValue`].
+    pub fn into_value(self) -> Value {
+        self.value
+    }
+
+    /// Extract [`Key`] and [`Value`] from [`KeyValue`].
+    pub fn into_parts(self) -> (Key, Value) {
+        (self.key, self.value)
     }
 
     pub(crate) fn new(key: Key, value: Value) -> KeyValue {
