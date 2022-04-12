@@ -58,11 +58,11 @@ fn main() -> Result<(), Box<dyn Error>> {
                 );
 
                 while let Some(x) = range_stream.next().await {
-                    let kv = x?;
+                    let (key, value) = x?.into_parts();
                     println!(
                         "{} is {}",
-                        String::from_utf8_lossy(&Bytes::from(kv.get_key().clone())[..]),
-                        String::from_utf8_lossy(&Bytes::from(kv.get_value().clone())[..])
+                        String::from_utf8_lossy(&Bytes::from(key)[..]),
+                        String::from_utf8_lossy(&Bytes::from(value)[..])
                     );
                 }
 
@@ -72,11 +72,11 @@ fn main() -> Result<(), Box<dyn Error>> {
                     .into_stream(&tr, RangeOptions::default());
 
                 while let Some(x) = range_stream.next().await {
-                    let kv = x?;
+                    let (key, value) = x?.into_parts();
                     println!(
                         "{} is {}",
-                        String::from_utf8_lossy(&Bytes::from(kv.get_key().clone())[..]),
-                        String::from_utf8_lossy(&Bytes::from(kv.get_value().clone())[..])
+                        String::from_utf8_lossy(&Bytes::from(key)[..]),
+                        String::from_utf8_lossy(&Bytes::from(value)[..])
                     );
                 }
 
@@ -96,11 +96,11 @@ fn main() -> Result<(), Box<dyn Error>> {
                 );
 
                 while let Some(x) = range_stream.next().await {
-                    let kv = x?;
+                    let (key, value) = x?.into_parts();
                     println!(
                         "{} is {}",
-                        String::from_utf8_lossy(&Bytes::from(kv.get_key().clone())[..]),
-                        String::from_utf8_lossy(&Bytes::from(kv.get_value().clone())[..])
+                        String::from_utf8_lossy(&Bytes::from(key)[..]),
+                        String::from_utf8_lossy(&Bytes::from(value)[..])
                     );
                 }
 
@@ -110,11 +110,11 @@ fn main() -> Result<(), Box<dyn Error>> {
                     .into_stream(&tr, RangeOptions::default());
 
                 while let Some(x) = range_stream.next().await {
-                    let kv = x?;
+                    let (key, value) = x?.into_parts();
                     println!(
                         "{} is {}",
-                        String::from_utf8_lossy(&Bytes::from(kv.get_key().clone())[..]),
-                        String::from_utf8_lossy(&Bytes::from(kv.get_value().clone())[..])
+                        String::from_utf8_lossy(&Bytes::from(key)[..]),
+                        String::from_utf8_lossy(&Bytes::from(value)[..])
                     );
                 }
 

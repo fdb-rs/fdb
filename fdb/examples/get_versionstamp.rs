@@ -2,9 +2,8 @@ use bytes::Bytes;
 
 use fdb::range::RangeOptions;
 use fdb::subspace::Subspace;
-use fdb::transaction::{MutationType, ReadTransaction, Transaction};
+use fdb::transaction::{MutationType, Transaction};
 use fdb::tuple::{Tuple, Versionstamp};
-use fdb::KeySelector;
 
 use tokio::runtime::Runtime;
 use tokio_stream::StreamExt;
@@ -62,18 +61,13 @@ fn main() -> Result<(), Box<dyn Error>> {
 
                 let subspace_range = subspace.range(&Tuple::new());
 
-                let key = tr
-                    .get_range(
-                        KeySelector::first_greater_or_equal(subspace_range.begin().clone()),
-                        KeySelector::first_greater_or_equal(subspace_range.end().clone()),
-                        RangeOptions::default(),
-                    )
+                let key = subspace_range
+                    .into_stream(&tr, RangeOptions::default())
                     .take(1)
                     .next()
                     .await
                     .unwrap()?
-                    .get_key()
-                    .clone();
+                    .into_key();
 
                 Ok(subspace
                     .unpack(&key.into())?

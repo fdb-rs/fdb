@@ -476,11 +476,12 @@ impl RangeResultStateMachine {
 
                         if self.reverse {
                             self.end_sel = KeySelector::first_greater_or_equal(
-                                kvs[last_index].get_key().clone(),
+                                kvs[last_index].get_key_ref().clone(),
                             );
                         } else {
-                            self.begin_sel =
-                                KeySelector::first_greater_than(kvs[last_index].get_key().clone());
+                            self.begin_sel = KeySelector::first_greater_than(
+                                kvs[last_index].get_key_ref().clone(),
+                            );
                         }
                     }
 
