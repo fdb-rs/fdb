@@ -12,7 +12,7 @@ use crate::range::{Range, RangeOptions};
 use crate::transaction::{
     FdbReadTransaction, FdbTransaction, ReadTransaction, Transaction, TransactionOption,
 };
-use crate::{Key, KeySelector};
+use crate::Key;
 
 /// A mutable, lexicographically ordered mapping from binary keys to
 /// binary values.
@@ -116,15 +116,11 @@ impl FdbDatabase {
 
         let mut res = Vec::new();
 
-        let mut range_stream = tr.snapshot().get_range(
-            KeySelector::first_greater_or_equal(range.begin().clone()),
-            KeySelector::first_greater_or_equal(range.end().clone()),
-            {
-                let mut ro = RangeOptions::default();
-                ro.set_limit(limit);
-                ro
-            },
-        );
+        let mut range_stream = range.into_stream(&tr.snapshot(), {
+            let mut ro = RangeOptions::default();
+            ro.set_limit(limit);
+            ro
+        });
 
         while let Some(x) = range_stream.next().await {
             let kv = x?;
