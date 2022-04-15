@@ -14,6 +14,15 @@ use crate::transaction::{
 };
 use crate::Key;
 
+#[cfg(feature = "fdb-7_1")]
+use std::convert::TryInto;
+
+#[cfg(feature = "fdb-7_1")]
+use crate::Tenant;
+
+#[cfg(feature = "fdb-7_1")]
+use crate::tenant::FdbTenant;
+
 /// A mutable, lexicographically ordered mapping from binary keys to
 /// binary values.
 ///
@@ -132,6 +141,39 @@ impl FdbDatabase {
         }
 
         Ok(res)
+    }
+
+    #[cfg(feature = "fdb-7_1")]
+    /// Opens an existing tenant to be used for running transactions.
+    ///
+    /// **Note:** Opening a tenant does not check its existence in the
+    /// cluster.
+    pub fn open_tenant(&self, tenant_name: impl Into<Tenant>) -> FdbResult<FdbTenant> {
+        let t = Bytes::from(tenant_name.into());
+        let tenant_name = t.as_ref().as_ptr();
+        let tenant_name_length = t.as_ref().len().try_into().unwrap();
+
+        let mut ptr: *mut fdb_sys::FDB_tenant = ptr::null_mut();
+
+        // Safety: It is safe to unwrap here because if we have given
+        // out an `FdbDatabase` then `c_ptr` *must* be
+        // `Some<Arc<...>>`.
+        check(unsafe {
+            fdb_sys::fdb_database_open_tenant(
+                (*(self.c_ptr.as_ref().unwrap())).as_ptr(),
+                tenant_name,
+                tenant_name_length,
+                &mut ptr,
+            )
+        })
+        .map(|_| {
+            FdbTenant::new(
+                Some(Arc::new(NonNull::new(ptr).expect(
+                    "fdb_database_open_tenant returned null, but did not return an error",
+                ))),
+                t.into(),
+            )
+        })
     }
 
     // In Java following method is on `Interface TransactionContext`.

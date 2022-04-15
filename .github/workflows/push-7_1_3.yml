@@ -1,15 +1,15 @@
-name: pull_request-6_3_23
+name: push-7_1_3
 
 env:
-  image_version: 6_3_23
-  image_tag: abf0816e3ceb
+  image_version: 7_1_3
+  image_tag: 3205cb0f188a
 
 on:
-  pull_request:
+  push:
     branches: ["main", "fdb-*.x"]
 
 jobs:
-  job-on-pull_request:
+  job-on-push:
     runs-on: ubuntu-20.04
 
     steps:
@@ -23,13 +23,13 @@ jobs:
         run: |
           sudo podman run --name fdb --volume ${GITHUB_WORKSPACE}:/home/runner/fdb --rm ghcr.io/fdb-rs/fdb-${{ env.image_version }}:${{ env.image_tag }} &
       -
-        name: Run 6.3/pull_request.sh
+        name: Run 7.1/push.sh
         run: |
-          sudo podman exec --user runner:docker --workdir /home/runner/fdb/nix/ci --tty fdb nix develop .#pull_request-6_3_23 --command ./6.3/pull_request.sh
+          sudo podman exec --user runner:docker --workdir /home/runner/fdb/nix/ci --tty fdb nix develop .#push-7_1_3 --command ./7.1/push.sh
       -
-        name: Run 6.3/pull_request_lcov.sh
+        name: Run 7.1/push_lcov.sh
         run: |
-          sudo podman exec --user runner:docker --workdir /home/runner/fdb/nix/ci --tty fdb nix develop .#pull_request-nightly-6_3_23 --command ./6.3/pull_request_lcov.sh
+          sudo podman exec --user runner:docker --workdir /home/runner/fdb/nix/ci --tty fdb nix develop .#push-nightly-7_1_3 --command ./7.1/push_lcov.sh
       -
         name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1

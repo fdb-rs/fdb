@@ -1,0 +1,39 @@
+name: push-rustdoc-7_1_3
+
+env:
+  image_version: 7_1_3
+  image_tag: 3205cb0f188a
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  job-on-push:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v2
+      -
+        name: Pull ghcr.io/fdb-rs/fdb-${{ env.image_version }}:${{ env.image_tag }} container
+        run: |
+          sudo podman pull ghcr.io/fdb-rs/fdb-${{ env.image_version }}:${{ env.image_tag }}
+      -
+        name: Start container
+        run: |
+          sudo podman run --name fdb --volume ${GITHUB_WORKSPACE}:/home/runner/fdb --rm ghcr.io/fdb-rs/fdb-${{ env.image_version }}:${{ env.image_tag }} &
+      -
+        name: Run 7.1/push_rustdoc.sh
+        run: |
+          sudo podman exec --user runner:docker --workdir /home/runner/fdb/nix/ci --tty fdb nix develop .#push_rustdoc-7_1_3 --command ./7.1/push_rustdoc.sh
+      -
+        name: Deploy docs
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./target/doc
+      -
+        name: Stop container
+        run: |
+          sudo podman stop fdb

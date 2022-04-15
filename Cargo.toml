@@ -3,5 +3,6 @@ members = [
     "fdb",
     "fdb-gen",
     "fdb-stacktester/fdb-stacktester-630",
+    "fdb-stacktester/fdb-stacktester-710",
     "fdb-sys",
 ]

@@ -10,11 +10,14 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::path::PathBuf;
 
-#[cfg(not(any(feature = "fdb-6_3")))]
+#[cfg(not(any(feature = "fdb-6_3", feature = "fdb-7_1")))]
 const INCLUDE_PATH: &str = "";
 
 #[cfg(feature = "fdb-6_3")]
 const INCLUDE_PATH: &str = "-I./include/630";
+
+#[cfg(feature = "fdb-7_1")]
+const INCLUDE_PATH: &str = "-I./include/710";
 
 fn main() {
     // Link against fdb_c.
@@ -34,12 +37,17 @@ fn main() {
     // src/wrapper.h file with the chosen version instead.
     let mut api_version = 0;
 
-    #[cfg(not(any(feature = "fdb-6_3")))]
+    #[cfg(not(any(feature = "fdb-6_3", feature = "fdb-7_1")))]
     panic!("Please specify fdb-<major>_<minor> feature");
 
     #[cfg(feature = "fdb-6_3")]
     {
         api_version = 630;
+    }
+
+    #[cfg(feature = "fdb-7_1")]
+    {
+        api_version = 710;
     }
 
     // Sigh, bindgen only takes a String for its header path, but

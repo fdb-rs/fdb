@@ -1,0 +1,9 @@
+[Unit]
+Description=FoundationDB Key-Value Store
+
+[Service]
+User=fdb
+ExecStart=/opt/fdb/monitor/fdbmonitor --conffile /opt/fdb/conf/foundationdb.conf
+
+[Install]
+WantedBy=default.target

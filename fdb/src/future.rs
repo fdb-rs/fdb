@@ -25,6 +25,17 @@ use crate::range::{
 use crate::transaction::FdbTransaction;
 use crate::{Key, KeySelector, KeyValue, Value};
 
+#[cfg(feature = "fdb-7_1")]
+use crate::{MappedKeyValue, Mapper};
+
+#[cfg(feature = "fdb-7_1")]
+use crate::mapped_range::{
+    fdb_transaction_get_mapped_range, MappedKeyValueArray, MappedRangeResultStateMachine,
+};
+
+#[cfg(feature = "fdb-7_1")]
+use crate::range::Range;
+
 /// A [`FdbFuture`] represents a value (or error) to be available at
 /// some other time.
 ///
@@ -342,6 +353,42 @@ impl FdbFutureGet for Vec<CString> {
     }
 }
 
+/// Represents the asynchronous result of a function that returns an
+/// array of [`Key`].
+#[cfg(feature = "fdb-7_1")]
+pub type FdbFutureKeyArray = FdbFuture<Vec<Key>>;
+
+#[cfg(feature = "fdb-7_1")]
+impl FdbFutureGet for Vec<Key> {
+    unsafe fn get(future: *mut fdb_sys::FDBFuture) -> FdbResult<Vec<Key>> {
+        let mut out_key_array = ptr::null();
+        let mut out_count = 0;
+
+        check(fdb_sys::fdb_future_get_key_array(
+            future,
+            &mut out_key_array,
+            &mut out_count,
+        ))
+        .map(|_| {
+            let mut ks = Vec::with_capacity(out_count.try_into().unwrap());
+
+            (0..out_count).into_iter().for_each(|i| {
+                let k = out_key_array.offset(i.try_into().unwrap());
+
+                let key = Bytes::copy_from_slice(slice::from_raw_parts(
+                    (*k).key,
+                    (*k).key_length.try_into().unwrap(),
+                ))
+                .into();
+
+                ks.push(key);
+            });
+
+            ks
+        })
+    }
+}
+
 pub(crate) type FdbFutureKeyValueArray = FdbFuture<KeyValueArray>;
 
 impl FdbFutureGet for KeyValueArray {
@@ -379,6 +426,92 @@ impl FdbFutureGet for KeyValueArray {
 
             // non-zero is `true`.
             KeyValueArray::new(kvs, out_count, out_more != 0)
+        })
+    }
+}
+
+#[cfg(feature = "fdb-7_1")]
+pub(crate) type FdbFutureMappedKeyValueArray = FdbFuture<MappedKeyValueArray>;
+
+#[cfg(feature = "fdb-7_1")]
+impl FdbFutureGet for MappedKeyValueArray {
+    unsafe fn get(future: *mut fdb_sys::FDBFuture) -> FdbResult<MappedKeyValueArray> {
+        let mut out_mkv = ptr::null();
+        let mut out_count = 0;
+        let mut out_more = 0;
+
+        check(fdb_sys::fdb_future_get_mappedkeyvalue_array(
+            future,
+            &mut out_mkv,
+            &mut out_count,
+            &mut out_more,
+        ))
+        .map(|_| {
+            let mut mkvs = Vec::with_capacity(out_count.try_into().unwrap());
+
+            (0..out_count).into_iter().for_each(|i| {
+                let mkv = out_mkv.offset(i.try_into().unwrap());
+
+                let key_value = {
+                    let key = Bytes::copy_from_slice(slice::from_raw_parts(
+                        (*mkv).key.key,
+                        (*mkv).key.key_length.try_into().unwrap(),
+                    ))
+                    .into();
+
+                    let value = Bytes::copy_from_slice(slice::from_raw_parts(
+                        (*mkv).value.key,
+                        (*mkv).value.key_length.try_into().unwrap(),
+                    ))
+                    .into();
+
+                    KeyValue::new(key, value)
+                };
+
+                let range = {
+                    let begin = Bytes::copy_from_slice(slice::from_raw_parts(
+                        (*mkv).getRange.begin.key.key,
+                        (*mkv).getRange.begin.key.key_length.try_into().unwrap(),
+                    ));
+
+                    let end = Bytes::copy_from_slice(slice::from_raw_parts(
+                        (*mkv).getRange.end.key.key,
+                        (*mkv).getRange.end.key.key_length.try_into().unwrap(),
+                    ));
+
+                    Range::new(begin, end)
+                };
+
+                // Referred to as `kvm_count` in Java binding [1].
+                //
+                // [1]: https://github.com/apple/foundationdb/blob/7.1.1/bindings/java/fdbJNI.cpp#L534
+                let range_result_count = (*mkv).getRange.m_size;
+
+                let mut range_result = Vec::with_capacity(range_result_count.try_into().unwrap());
+
+                (0..range_result_count).into_iter().for_each(|j| {
+                    let kv = (*mkv).getRange.data.offset(j.try_into().unwrap());
+
+                    let key = Bytes::copy_from_slice(slice::from_raw_parts(
+                        (*kv).key,
+                        (*kv).key_length.try_into().unwrap(),
+                    ))
+                    .into();
+
+                    let value = Bytes::copy_from_slice(slice::from_raw_parts(
+                        (*kv).value,
+                        (*kv).value_length.try_into().unwrap(),
+                    ))
+                    .into();
+
+                    range_result.push(KeyValue::new(key, value));
+                });
+
+                mkvs.push(MappedKeyValue::new(key_value, range, range_result));
+            });
+
+            // non-zero is `true`.
+            MappedKeyValueArray::new(mkvs, out_count, out_more != 0)
         })
     }
 }
@@ -456,6 +589,85 @@ impl Stream for FdbStreamKeyValue {
     }
 }
 
+#[cfg(feature = "fdb-7_1")]
+/// A stream of [`MappedKeyValue`]s.
+#[derive(Debug)]
+pub struct FdbStreamMappedKeyValue {
+    mapped_range_result_state_machine: MappedRangeResultStateMachine,
+}
+
+#[cfg(feature = "fdb-7_1")]
+impl FdbStreamMappedKeyValue {
+    pub(crate) fn new(
+        transaction: FdbTransaction,
+        begin: KeySelector,
+        end: KeySelector,
+        mapper: Mapper,
+        options: RangeOptions,
+        snapshot: bool,
+    ) -> FdbStreamMappedKeyValue {
+        let limit = if options.get_limit() == 0 {
+            None
+        } else {
+            Some(options.get_limit())
+        };
+
+        // Binding tester tests for `2210` error. So, if we are
+        // provided with `StreamingMode::Exact` and a `limit` of `0`,
+        // we can't change it to `StreamingMode::WantAll`
+        let mode = options.get_mode();
+
+        let reverse = options.get_reverse();
+
+        // `iteration` is only valid when mode is
+        // `StreamingMode::Iterator`. It is ignored in other modes.
+        let iteration = if options.get_mode() == StreamingMode::Iterator {
+            Some(1)
+        } else {
+            None
+        };
+
+        let fdb_future_mapped_key_value_array = fdb_transaction_get_mapped_range(
+            transaction.get_c_api_ptr(),
+            begin.clone(),
+            end.clone(),
+            mapper.clone(),
+            RangeOptions::new(limit.unwrap_or(0), mode, reverse),
+            iteration.unwrap_or(0),
+            snapshot,
+        );
+
+        let mapped_range_result_state_machine = MappedRangeResultStateMachine::new(
+            transaction,
+            begin,
+            end,
+            mapper,
+            mode,
+            iteration,
+            reverse,
+            limit,
+            snapshot,
+            fdb_future_mapped_key_value_array,
+        );
+
+        FdbStreamMappedKeyValue {
+            mapped_range_result_state_machine,
+        }
+    }
+}
+
+#[cfg(feature = "fdb-7_1")]
+impl Stream for FdbStreamMappedKeyValue {
+    type Item = FdbResult<MappedKeyValue>;
+
+    fn poll_next(
+        mut self: Pin<&mut FdbStreamMappedKeyValue>,
+        cx: &mut Context<'_>,
+    ) -> Poll<Option<FdbResult<MappedKeyValue>>> {
+        Pin::new(&mut self.mapped_range_result_state_machine).poll_next(cx)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use futures::task::AtomicWaker;
@@ -472,6 +684,9 @@ mod tests {
         FdbFutureCStringArray, FdbFutureI64, FdbFutureKey, FdbFutureKeyValueArray,
         FdbFutureMaybeValue, FdbFutureUnit, FdbStreamKeyValue,
     };
+
+    #[cfg(feature = "fdb-7_1")]
+    use super::{FdbFutureKeyArray, FdbFutureMappedKeyValueArray, FdbStreamMappedKeyValue};
 
     #[test]
     fn impls() {
@@ -530,6 +745,33 @@ mod tests {
 	        Stream &
 		!Clone &
 		!Copy));
+
+        #[cfg(feature = "fdb-7_1")]
+        #[rustfmt::skip]
+        assert!(impls!(
+	    FdbFutureKeyArray:
+	        Send &
+	        Future &
+		!Clone &
+		!Copy));
+
+        #[cfg(feature = "fdb-7_1")]
+        #[rustfmt::skip]
+        assert!(impls!(
+            FdbFutureMappedKeyValueArray:
+	        Send &
+	        Future &
+		!Clone &
+		!Copy));
+
+        #[cfg(feature = "fdb-7_1")]
+        #[rustfmt::skip]
+        assert!(impls!(
+            FdbStreamMappedKeyValue:
+                Send &
+                Stream &
+                !Clone &
+                !Copy));
     }
 
     #[allow(dead_code)]

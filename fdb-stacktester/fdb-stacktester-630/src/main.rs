@@ -1023,15 +1023,15 @@ impl StackMachine {
                         }
                     }
 
-                    let res_range = res_tup.range(Bytes::new());
+                    let (res_range_begin, res_range_end) = res_tup.range(Bytes::new()).into_parts();
 
                     self.store(
                         inst_number,
-                        StackEntryItem::Bytes(res_range.begin().clone().into()),
+                        StackEntryItem::Bytes(res_range_begin.into()),
                     );
                     self.store(
                         inst_number,
-                        StackEntryItem::Bytes(res_range.end().clone().into()),
+                        StackEntryItem::Bytes(res_range_end.into()),
                     );
                 }
                 "TUPLE_SORT" => {

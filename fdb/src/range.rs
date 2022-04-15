@@ -13,6 +13,12 @@ use crate::transaction::{FdbTransaction, ReadTransaction};
 use crate::tuple::key_util;
 use crate::{Key, KeySelector, KeyValue};
 
+#[cfg(feature = "fdb-7_1")]
+use crate::Mapper;
+
+#[cfg(feature = "fdb-7_1")]
+use crate::future::FdbStreamMappedKeyValue;
+
 pub use crate::option::StreamingMode;
 
 /// [`Range`] describes an exact range of keyspace, specified by a
@@ -52,14 +58,30 @@ impl Range {
         )
     }
 
-    /// Return the beginning of the range.
-    pub fn begin(&self) -> &Key {
+    /// Gets a reference to the begin [`Key`] of the [`Range`].
+    pub fn begin_key_ref(&self) -> &Key {
         &self.begin
     }
 
-    /// Return the end of the range.
-    pub fn end(&self) -> &Key {
+    /// Gets a reference to the end [`Key`] of the [`Range`].
+    pub fn end_key_ref(&self) -> &Key {
         &self.end
+    }
+
+    /// Extract begin [`Key`] from the [`Range`].
+    pub fn into_begin_key(self) -> Key {
+        self.begin
+    }
+
+    /// Extract end [`Key`] from the [`Range`].
+    pub fn into_end_key(self) -> Key {
+        self.end
+    }
+
+    /// Extract begin and end [`Key`] from the [`Range`].
+    pub fn into_parts(self) -> (Key, Key) {
+        let Range { begin, end } = self;
+        (begin, end)
     }
 
     /// Gets an ordered range of keys and values from the database.
@@ -72,7 +94,7 @@ impl Range {
     where
         T: ReadTransaction,
     {
-        let (begin_key, end_key) = self.deconstruct();
+        let (begin_key, end_key) = self.into_parts();
 
         let begin_key_selector = KeySelector::first_greater_or_equal(begin_key);
         let end_key_selector = KeySelector::first_greater_or_equal(end_key);
@@ -80,9 +102,30 @@ impl Range {
         rt.get_range(begin_key_selector, end_key_selector, options)
     }
 
-    pub(crate) fn deconstruct(self) -> (Key, Key) {
-        let Range { begin, end } = self;
-        (begin, end)
+    #[cfg(feature = "fdb-7_1")]
+    /// Gets an ordered range of mapped keys and values from the
+    /// database.
+    ///
+    /// The returned [`FdbStreamMappedKeyValue`] implements [`Stream`] trait
+    /// that yields a [`MappedKeyValue`] item.
+    ///
+    /// [`Stream`]: futures::Stream
+    /// [`MappedKeyValue`]: crate::MappedKeyValue
+    pub fn into_mapped_stream<T>(
+        self,
+        rt: &T,
+        mapper: Mapper,
+        options: RangeOptions,
+    ) -> FdbStreamMappedKeyValue
+    where
+        T: ReadTransaction,
+    {
+        let (begin_key, end_key) = self.into_parts();
+
+        let begin_key_selector = KeySelector::first_greater_or_equal(begin_key);
+        let end_key_selector = KeySelector::first_greater_or_equal(end_key);
+
+        rt.get_mapped_range(begin_key_selector, end_key_selector, mapper, options)
     }
 }
 
@@ -113,9 +156,9 @@ impl Range {
 /// [iterator streaming mode]: StreamingMode::Iterator
 #[derive(Clone, Debug)]
 pub struct RangeOptions {
-    limit: i32,
-    mode: StreamingMode,
-    reverse: bool,
+    pub(crate) limit: i32,
+    pub(crate) mode: StreamingMode,
+    pub(crate) reverse: bool,
 }
 
 impl RangeOptions {
@@ -236,7 +279,7 @@ enum RangeResultStateMachineEvent {
     FetchDone,
 }
 
-// An state machine that returns the key-value pairs in the database
+// A state machine that returns the key-value pairs from the database
 // satisfying the range specified in a range read.
 //
 // See `sismic/range_result_state_machine.yaml` for the design of the
@@ -535,17 +578,17 @@ pub(crate) fn fdb_transaction_get_range(
     iteration: i32,
     snapshot: bool,
 ) -> FdbFutureKeyValueArray {
-    let bk = Bytes::from(begin_key.get_key().clone());
+    let (key, begin_or_equal, begin_offset) = begin_key.deconstruct();
+    let bk = Bytes::from(key);
     let begin_key_name = bk.as_ref().as_ptr();
     let begin_key_name_length = bk.as_ref().len().try_into().unwrap();
-    let begin_or_equal = if begin_key.or_equal() { 1 } else { 0 };
-    let begin_offset = begin_key.get_offset();
+    let begin_or_equal = if begin_or_equal { 1 } else { 0 };
 
-    let ek = Bytes::from(end_key.get_key().clone());
+    let (key, end_or_equal, end_offset) = end_key.deconstruct();
+    let ek = Bytes::from(key);
     let end_key_name = ek.as_ref().as_ptr();
     let end_key_name_length = ek.as_ref().len().try_into().unwrap();
-    let end_or_equal = if end_key.or_equal() { 1 } else { 0 };
-    let end_offset = end_key.get_offset();
+    let end_or_equal = if end_or_equal { 1 } else { 0 };
 
     // This is similar to Java, where calls to `tr.getRange_internal`
     // sets the `target_bytes` to `0`.

@@ -1,0 +1,12 @@
+[Unit]
+Description=Setup FDB cluster
+After=foundationdb.service
+
+[Service]
+User=fdb
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/opt/fdb/cli/@version@/fdbcli -C /opt/fdb/conf/fdb.cluster --exec "configure new single memory tenant_mode=optional_experimental"
+
+[Install]
+WantedBy=default.target
