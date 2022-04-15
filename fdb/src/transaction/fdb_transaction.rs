@@ -16,6 +16,12 @@ use crate::transaction::{MutationType, ReadTransaction, Transaction, Transaction
 use crate::tuple::key_util;
 use crate::{Key, KeySelector, Value};
 
+#[cfg(feature = "fdb-7_1")]
+use crate::future::{FdbFutureKeyArray, FdbStreamMappedKeyValue};
+
+#[cfg(feature = "fdb-7_1")]
+use crate::Mapper;
+
 /// Committed version of the [`Transaction`].
 ///
 /// [`get_committed_version`] provides a value of this type. This
@@ -233,13 +239,26 @@ impl ReadTransaction for FdbTransaction {
     }
 
     fn get_estimated_range_size_bytes(&self, range: Range) -> FdbFutureI64 {
-        let (begin, end) = range.deconstruct();
+        let (begin, end) = range.into_parts();
 
         internal::read_transaction::get_estimated_range_size_bytes(self.get_c_api_ptr(), begin, end)
     }
 
     fn get_key(&self, selector: KeySelector) -> FdbFutureKey {
         internal::read_transaction::get_key(self.get_c_api_ptr(), selector, false)
+    }
+
+    #[cfg(feature = "fdb-7_1")]
+    fn get_mapped_range(
+        &self,
+        begin: KeySelector,
+        end: KeySelector,
+        mapper: impl Into<Mapper>,
+        options: RangeOptions,
+    ) -> FdbStreamMappedKeyValue {
+        // Convert to a value `Mapper` type here as we need to
+        // maintain a `Mapper` in the state machine.
+        FdbStreamMappedKeyValue::new(self.clone(), begin, end, mapper.into(), options, false)
     }
 
     fn get_range(
@@ -249,6 +268,21 @@ impl ReadTransaction for FdbTransaction {
         options: RangeOptions,
     ) -> FdbStreamKeyValue {
         FdbStreamKeyValue::new(self.clone(), begin, end, options, false)
+    }
+
+    #[cfg(feature = "fdb-7_1")]
+    fn get_range_split_points(
+        &self,
+        begin: impl Into<Key>,
+        end: impl Into<Key>,
+        chunk_size: i64,
+    ) -> FdbFutureKeyArray {
+        internal::read_transaction::get_range_split_points(
+            self.get_c_api_ptr(),
+            begin,
+            end,
+            chunk_size,
+        )
     }
 
     unsafe fn get_read_version(&self) -> FdbFutureI64 {
@@ -282,7 +316,7 @@ impl Transaction for FdbTransaction {
     }
 
     fn add_read_conflict_range(&self, range: Range) -> FdbResult<()> {
-        let (begin, end) = range.deconstruct();
+        let (begin, end) = range.into_parts();
 
         internal::transaction::add_conflict_range(
             self.get_c_api_ptr(),
@@ -309,7 +343,7 @@ impl Transaction for FdbTransaction {
     }
 
     fn add_write_conflict_range(&self, range: Range) -> FdbResult<()> {
-        let (begin, end) = range.deconstruct();
+        let (begin, end) = range.into_parts();
 
         internal::transaction::add_conflict_range(
             self.get_c_api_ptr(),
@@ -332,7 +366,7 @@ impl Transaction for FdbTransaction {
     }
 
     fn clear_range(&self, range: Range) {
-        let (begin_key, end_key) = range.deconstruct();
+        let (begin_key, end_key) = range.into_parts();
 
         let bk = Bytes::from(begin_key);
         let begin_key_name = bk.as_ref().as_ptr();
@@ -518,7 +552,7 @@ impl ReadTransaction for FdbReadTransaction {
     }
 
     fn get_addresses_for_key(&self, key: impl Into<Key>) -> FdbFutureCStringArray {
-        internal::read_transaction::get_addresses_for_key(self.inner.get_c_api_ptr(), key)
+        self.inner.get_addresses_for_key(key)
     }
 
     fn get_estimated_range_size_bytes(&self, range: Range) -> FdbFutureI64 {
@@ -529,6 +563,19 @@ impl ReadTransaction for FdbReadTransaction {
         internal::read_transaction::get_key(self.inner.get_c_api_ptr(), selector, true)
     }
 
+    #[cfg(feature = "fdb-7_1")]
+    fn get_mapped_range(
+        &self,
+        begin: KeySelector,
+        end: KeySelector,
+        mapper: impl Into<Mapper>,
+        options: RangeOptions,
+    ) -> FdbStreamMappedKeyValue {
+        // Convert to a value `Mapper` type here as we need to
+        // maintain a `Mapper` in the state machine.
+        FdbStreamMappedKeyValue::new(self.inner.clone(), begin, end, mapper.into(), options, true)
+    }
+
     fn get_range(
         &self,
         begin: KeySelector,
@@ -536,6 +583,16 @@ impl ReadTransaction for FdbReadTransaction {
         options: RangeOptions,
     ) -> FdbStreamKeyValue {
         FdbStreamKeyValue::new(self.inner.clone(), begin, end, options, true)
+    }
+
+    #[cfg(feature = "fdb-7_1")]
+    fn get_range_split_points(
+        &self,
+        begin: impl Into<Key>,
+        end: impl Into<Key>,
+        chunk_size: i64,
+    ) -> FdbFutureKeyArray {
+        self.inner.get_range_split_points(begin, end, chunk_size)
     }
 
     unsafe fn get_read_version(&self) -> FdbFutureI64 {
@@ -600,6 +657,9 @@ pub(super) mod internal {
         use crate::transaction::TransactionOption;
         use crate::{Key, KeySelector};
 
+        #[cfg(feature = "fdb-7_1")]
+        use crate::future::FdbFutureKeyArray;
+
         pub(crate) fn get(
             transaction: *mut fdb_sys::FDBTransaction,
             key: impl Into<Key>,
@@ -661,11 +721,11 @@ pub(super) mod internal {
             selector: KeySelector,
             snapshot: bool,
         ) -> FdbFutureKey {
-            let k = Bytes::from(selector.get_key().clone());
+            let (key, or_equal, offset) = selector.deconstruct();
+            let k = Bytes::from(key);
             let key_name = k.as_ref().as_ptr();
             let key_name_length = k.as_ref().len().try_into().unwrap();
-            let or_equal = if selector.or_equal() { 1 } else { 0 };
-            let offset = selector.get_offset();
+            let or_equal = if or_equal { 1 } else { 0 };
 
             let s = if snapshot { 1 } else { 0 };
 
@@ -677,6 +737,33 @@ pub(super) mod internal {
                     or_equal,
                     offset,
                     s,
+                )
+            })
+        }
+
+        #[cfg(feature = "fdb-7_1")]
+        pub(crate) fn get_range_split_points(
+            transaction: *mut fdb_sys::FDBTransaction,
+            begin_key: impl Into<Key>,
+            end_key: impl Into<Key>,
+            chunk_size: i64,
+        ) -> FdbFutureKeyArray {
+            let bk = Bytes::from(begin_key.into());
+            let begin_key_name = bk.as_ref().as_ptr();
+            let begin_key_name_length = bk.as_ref().len().try_into().unwrap();
+
+            let ek = Bytes::from(end_key.into());
+            let end_key_name = ek.as_ref().as_ptr();
+            let end_key_name_length = ek.as_ref().len().try_into().unwrap();
+
+            FdbFuture::new(unsafe {
+                fdb_sys::fdb_transaction_get_range_split_points(
+                    transaction,
+                    begin_key_name,
+                    begin_key_name_length,
+                    end_key_name,
+                    end_key_name_length,
+                    chunk_size,
                 )
             })
         }

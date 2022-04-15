@@ -169,7 +169,12 @@ impl KeySelector {
         KeySelector::new(key, false, 0)
     }
 
-    pub(crate) fn or_equal(&self) -> bool {
-        self.or_equal
+    pub(crate) fn deconstruct(self) -> (Key, bool, i32) {
+        let KeySelector {
+            key,
+            or_equal,
+            offset,
+        } = self;
+        (key, or_equal, offset)
     }
 }

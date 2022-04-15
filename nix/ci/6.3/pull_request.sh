@@ -14,11 +14,16 @@ cd ../../fdb || { echo "cd failure"; exit 1; }
 
 cargo build --lib --features=fdb-6_3
 
-cargo build --examples --features=fdb-6_3
+cargo build --example get_committed_version --features=fdb-6_3
+cargo build --example get_range --features=fdb-6_3
+cargo build --example get_versionstamp --features=fdb-6_3
+cargo build --example hello_world --features=fdb-6_3
+cargo build --example open_database --features=fdb-6_3
+cargo build --example watch --features=fdb-6_3
 
 RUSTDOCFLAGS="--deny warnings" cargo doc --lib --features=fdb-6_3
 
-cargo test --features=fdb-6_3
+cargo test --lib --tests --features=fdb-6_3
 
 echo ""
 echo "+-------------------------------------------+"
@@ -29,7 +34,28 @@ cd ../ || { echo "cd failure"; exit 1; }
 
 cargo fmt --all --check
 
-cargo clippy --workspace --lib --bins --examples --tests --features=fdb-6_3 -- --deny warnings
+cd fdb-gen || { echo "cd failure"; exit 1; }
+cargo clippy --lib --bins --examples --tests --features=fdb-6_3 -- --deny warnings
+cd ../ || { echo "cd failure"; exit 1; }
+
+cd fdb-sys || { echo "cd failure"; exit 1; }
+cargo clippy --lib --bins --examples --tests --features=fdb-6_3 -- --deny warnings
+cd ../ || { echo "cd failure"; exit 1; }
+
+cd fdb || { echo "cd failure"; exit 1; }
+cargo clippy --lib --bins --tests --features=fdb-6_3 -- --deny warnings
+
+cargo clippy --example get_committed_version --features=fdb-6_3 -- --deny warnings
+cargo clippy --example get_range --features=fdb-6_3 -- --deny warnings
+cargo clippy --example get_versionstamp --features=fdb-6_3 -- --deny warnings
+cargo clippy --example hello_world --features=fdb-6_3 -- --deny warnings
+cargo clippy --example open_database --features=fdb-6_3 -- --deny warnings
+cargo clippy --example watch --features=fdb-6_3 -- --deny warnings
+cd ../ || { echo "cd failure"; exit 1; }
+
+cd fdb-stacktester/fdb-stacktester-630 || { echo "cd failure"; exit 1; }
+cargo clippy --bins -- --deny warnings
+cd ../../ || { echo "cd failure"; exit 1; }
 
 echo ""
 echo "+------------------------------+"
@@ -40,7 +66,7 @@ cd fdb-stacktester/fdb-stacktester-630 || { echo "cd failure"; exit 1; }
 
 cargo build --bin fdb-stacktester-630 --release
 
-pip install foundationdb==6.3.23
+pip install foundationdb==6.3.24
 
 # Run `scripted` test once. This is similar to how it is done in
 # `run_tester_loop.sh`.

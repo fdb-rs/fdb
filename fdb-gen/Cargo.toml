@@ -13,11 +13,12 @@ keywords = ["foundationdb", "tokio"]
 categories = ["database", "external-ffi-bindings"]
 
 [package.metadata.docs.rs]
-features = ["fdb-6_3"]
+features = ["fdb-7_1"]
 
 [features]
 default = []
 fdb-6_3 = []
+fdb-7_1 = []
 
 [dependencies]
 xml-rs = "0.8"

@@ -1,8 +1,8 @@
-name: push-6_3_23
+name: push-6_3_24
 
 env:
-  image_version: 6_3_23
-  image_tag: abf0816e3ceb
+  image_version: 6_3_24
+  image_tag: 3faa15b369a0
 
 on:
   push:
@@ -25,17 +25,7 @@ jobs:
       -
         name: Run 6.3/push.sh
         run: |
-          sudo podman exec --user runner:docker --workdir /home/runner/fdb/nix/ci --tty fdb nix develop .#push-6_3_23 --command ./6.3/push.sh
-      -
-        name: Run 6.3/push_lcov.sh
-        run: |
-          sudo podman exec --user runner:docker --workdir /home/runner/fdb/nix/ci --tty fdb nix develop .#push-nightly-6_3_23 --command ./6.3/push_lcov.sh
-      -
-        name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v1
-        with:
-          files: lcov.info
-          fail_ci_if_error: true
+          sudo podman exec --user runner:docker --workdir /home/runner/fdb/nix/ci --tty fdb nix develop .#push-6_3_24 --command ./6.3/push.sh
       -
         name: Stop container
         run: |

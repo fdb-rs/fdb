@@ -15,7 +15,7 @@ cd ../../fdb-stacktester/fdb-stacktester-630 || { echo "cd failure"; exit 1; }
 
 cargo build --bin fdb-stacktester-630 --release
 
-pip install foundationdb==6.3.23
+pip install foundationdb==6.3.24
 
 # Run `scripted` test once. This is similar to how it is done in
 # `run_tester_loop.sh`.

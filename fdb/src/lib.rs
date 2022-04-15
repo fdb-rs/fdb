@@ -16,6 +16,12 @@ mod fdb;
 mod key_value;
 mod option;
 
+#[cfg(feature = "fdb-7_1")]
+mod mapped_key_value;
+
+#[cfg(feature = "fdb-7_1")]
+mod mapped_range;
+
 pub mod database;
 pub mod error;
 pub mod future;
@@ -23,6 +29,9 @@ pub mod range;
 pub mod subspace;
 pub mod transaction;
 pub mod tuple;
+
+#[cfg(feature = "fdb-7_1")]
+pub mod tenant;
 
 /// Maximum API version supported by the client
 pub use fdb_sys::FDB_API_VERSION;
@@ -34,3 +43,9 @@ pub use crate::key_value::{Key, KeySelector, KeyValue, Value};
 pub use crate::database::open_database::open_database;
 
 pub use crate::option::NetworkOption;
+
+#[cfg(feature = "fdb-7_1")]
+pub use crate::mapped_key_value::{MappedKeyValue, Mapper};
+
+#[cfg(feature = "fdb-7_1")]
+pub use crate::tenant::tenant_inner::Tenant;

@@ -421,11 +421,14 @@ where
     panic!("unexpected end of token");
 }
 
-#[cfg(not(any(feature = "fdb-6_3")))]
+#[cfg(not(any(feature = "fdb-6_3", feature = "fdb-7_1")))]
 const OPTIONS_DATA: &[u8] = include_bytes!("Please specify fdb-<major>_<minor> feature");
 
 #[cfg(feature = "fdb-6_3")]
 const OPTIONS_DATA: &[u8] = include_bytes!("../include/630/fdb.options");
+
+#[cfg(feature = "fdb-7_1")]
+const OPTIONS_DATA: &[u8] = include_bytes!("../include/710/fdb.options");
 
 pub fn emit(w: &mut impl fmt::Write) -> fmt::Result {
     let mut reader = OPTIONS_DATA;

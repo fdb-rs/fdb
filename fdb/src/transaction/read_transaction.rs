@@ -7,6 +7,12 @@ use crate::range::{Range, RangeOptions};
 use crate::transaction::TransactionOption;
 use crate::{Key, KeySelector};
 
+#[cfg(feature = "fdb-7_1")]
+use crate::future::{FdbFutureKeyArray, FdbStreamMappedKeyValue};
+
+#[cfg(feature = "fdb-7_1")]
+use crate::Mapper;
+
 /// A read-only subset of a FDB [`Transaction`].
 ///
 /// [`Transaction`]: crate::transaction::Transaction
@@ -102,6 +108,25 @@ pub trait ReadTransaction {
     /// ```
     fn get_key(&self, selector: KeySelector) -> FdbFutureKey;
 
+    #[cfg(feature = "fdb-7_1")]
+    /// WARNING: This feature is considered experimental at this time.
+    ///
+    /// Gets an ordered range of mapped keys and values from the
+    /// database.
+    ///
+    /// The returned [`FdbStreamMappedKeyValue`] implements [`Stream`]
+    /// trait that yields a [`MappedKeyValue`] item.
+    ///
+    /// [`Stream`]: futures::Stream
+    /// [`MappedKeyValue`]: crate::MappedKeyValue
+    fn get_mapped_range(
+        &self,
+        begin: KeySelector,
+        end: KeySelector,
+        mapper: impl Into<Mapper>,
+        options: RangeOptions,
+    ) -> FdbStreamMappedKeyValue;
+
     /// Gets an ordered range of keys and values from the database.
     ///
     /// The returned [`FdbStreamKeyValue`] implements [`Stream`] trait
@@ -115,6 +140,27 @@ pub trait ReadTransaction {
         end: KeySelector,
         options: RangeOptions,
     ) -> FdbStreamKeyValue;
+
+    #[cfg(feature = "fdb-7_1")]
+    /// Gets a list of keys that can split the given range into
+    /// (roughly) equally sized chunks based on `chunk_size`.
+    ///
+    /// Equivalent to:
+    ///
+    /// ```ignore
+    /// async fn get_range_split_points(
+    ///     &self,
+    ///     begin: impl Into<Key>,
+    ///     end: impl Into<Key>,
+    ///     chunk_size: i64,
+    /// ) -> FdbResult<Vec<Key>>
+    /// ```
+    fn get_range_split_points(
+        &self,
+        begin: impl Into<Key>,
+        end: impl Into<Key>,
+        chunk_size: i64,
+    ) -> FdbFutureKeyArray;
 
     /// Gets the version at which the reads for this [`Transaction`]
     /// or [`ReadTransaction`] will access the database.
