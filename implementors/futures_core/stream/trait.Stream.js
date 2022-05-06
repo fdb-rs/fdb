@@ -1,3 +1,3 @@
 (function() {var implementors = {};
-implementors["fdb"] = [{"text":"impl Stream for <a class=\"struct\" href=\"fdb/future/struct.FdbStreamKeyValue.html\" title=\"struct fdb::future::FdbStreamKeyValue\">FdbStreamKeyValue</a>","synthetic":false,"types":["fdb::future::FdbStreamKeyValue"]}];
+implementors["fdb"] = [{"text":"impl Stream for <a class=\"struct\" href=\"fdb/future/struct.FdbStreamKeyValue.html\" title=\"struct fdb::future::FdbStreamKeyValue\">FdbStreamKeyValue</a>","synthetic":false,"types":["fdb::future::FdbStreamKeyValue"]},{"text":"impl Stream for <a class=\"struct\" href=\"fdb/future/struct.FdbStreamMappedKeyValue.html\" title=\"struct fdb::future::FdbStreamMappedKeyValue\">FdbStreamMappedKeyValue</a>","synthetic":false,"types":["fdb::future::FdbStreamMappedKeyValue"]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

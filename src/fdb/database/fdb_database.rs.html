@@ -1,6 +1,9 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `fdb&#x2F;src&#x2F;database&#x2F;fdb_database.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>fdb_database.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><script defer src="../../../main.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script>
-    <noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a class="sidebar-logo" href="../../../fdb/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.png" alt="logo"></div>
-        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../fdb/index.html"><img class="rust-logo" src="../../../rust-logo.png" alt="logo"></a><nav class="sub"><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `fdb/src/database/fdb_database.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>fdb_database.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><script defer src="../../../main.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script>
+    <noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../fdb/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div>
+        </a><h2 class="location"></h2>
+    </nav>
+    <nav class="sidebar"><a class="sidebar-logo" href="../../../fdb/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div>
+        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../fdb/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><div class="theme-picker hidden"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="22" height="22" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -396,6 +399,48 @@
 <span id="394">394</span>
 <span id="395">395</span>
 <span id="396">396</span>
+<span id="397">397</span>
+<span id="398">398</span>
+<span id="399">399</span>
+<span id="400">400</span>
+<span id="401">401</span>
+<span id="402">402</span>
+<span id="403">403</span>
+<span id="404">404</span>
+<span id="405">405</span>
+<span id="406">406</span>
+<span id="407">407</span>
+<span id="408">408</span>
+<span id="409">409</span>
+<span id="410">410</span>
+<span id="411">411</span>
+<span id="412">412</span>
+<span id="413">413</span>
+<span id="414">414</span>
+<span id="415">415</span>
+<span id="416">416</span>
+<span id="417">417</span>
+<span id="418">418</span>
+<span id="419">419</span>
+<span id="420">420</span>
+<span id="421">421</span>
+<span id="422">422</span>
+<span id="423">423</span>
+<span id="424">424</span>
+<span id="425">425</span>
+<span id="426">426</span>
+<span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">bytes</span>::{<span class="ident">BufMut</span>, <span class="ident">Bytes</span>, <span class="ident">BytesMut</span>};
 
 <span class="kw">use</span> <span class="ident">tokio_stream::StreamExt</span>;
@@ -411,6 +456,15 @@
     <span class="ident">FdbReadTransaction</span>, <span class="ident">FdbTransaction</span>, <span class="ident">ReadTransaction</span>, <span class="ident">Transaction</span>, <span class="ident">TransactionOption</span>,
 };
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::Key</span>;
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;fdb-7_1&quot;</span>)]</span>
+<span class="kw">use</span> <span class="ident">std::convert::TryInto</span>;
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;fdb-7_1&quot;</span>)]</span>
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::Tenant</span>;
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;fdb-7_1&quot;</span>)]</span>
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::tenant::FdbTenant</span>;
 
 <span class="doccomment">/// A mutable, lexicographically ordered mapping from binary keys to</span>
 <span class="doccomment">/// binary values.</span>
@@ -530,6 +584,39 @@
         }
 
         <span class="prelude-val">Ok</span>(<span class="ident">res</span>)
+    }
+
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;fdb-7_1&quot;</span>)]</span>
+    <span class="doccomment">/// Opens an existing tenant to be used for running transactions.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// **Note:** Opening a tenant does not check its existence in the</span>
+    <span class="doccomment">/// cluster.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">open_tenant</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">tenant_name</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Tenant</span><span class="op">&gt;</span>) -&gt; <span class="ident">FdbResult</span><span class="op">&lt;</span><span class="ident">FdbTenant</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">t</span> <span class="op">=</span> <span class="ident">Bytes::from</span>(<span class="ident">tenant_name</span>.<span class="ident">into</span>());
+        <span class="kw">let</span> <span class="ident">tenant_name</span> <span class="op">=</span> <span class="ident">t</span>.<span class="ident">as_ref</span>().<span class="ident">as_ptr</span>();
+        <span class="kw">let</span> <span class="ident">tenant_name_length</span> <span class="op">=</span> <span class="ident">t</span>.<span class="ident">as_ref</span>().<span class="ident">len</span>().<span class="ident">try_into</span>().<span class="ident">unwrap</span>();
+
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ptr</span>: <span class="kw-2">*mut</span> <span class="ident">fdb_sys::FDB_tenant</span> <span class="op">=</span> <span class="ident">ptr::null_mut</span>();
+
+        <span class="comment">// Safety: It is safe to unwrap here because if we have given</span>
+        <span class="comment">// out an `FdbDatabase` then `c_ptr` *must* be</span>
+        <span class="comment">// `Some&lt;Arc&lt;...&gt;&gt;`.</span>
+        <span class="ident">check</span>(<span class="kw">unsafe</span> {
+            <span class="ident">fdb_sys::fdb_database_open_tenant</span>(
+                (<span class="kw-2">*</span>(<span class="self">self</span>.<span class="ident">c_ptr</span>.<span class="ident">as_ref</span>().<span class="ident">unwrap</span>())).<span class="ident">as_ptr</span>(),
+                <span class="ident">tenant_name</span>,
+                <span class="ident">tenant_name_length</span>,
+                <span class="kw-2">&amp;mut</span> <span class="ident">ptr</span>,
+            )
+        })
+        .<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> {
+            <span class="ident">FdbTenant::new</span>(
+                <span class="prelude-val">Some</span>(<span class="ident">Arc::new</span>(<span class="ident">NonNull::new</span>(<span class="ident">ptr</span>).<span class="ident">expect</span>(
+                    <span class="string">&quot;fdb_database_open_tenant returned null, but did not return an error&quot;</span>,
+                ))),
+                <span class="ident">t</span>.<span class="ident">into</span>(),
+            )
+        })
     }
 
     <span class="comment">// In Java following method is on `Interface TransactionContext`.</span>
@@ -793,5 +880,5 @@
     }
 }
 </code></pre></div>
-</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="fdb" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.59.0 (9d1b2106e 2022-02-23)" ></div>
+</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="fdb" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.60.0 (7737e0b5c 2022-04-04)" ></div>
 </body></html>

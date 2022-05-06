@@ -1,6 +1,9 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `fdb&#x2F;src&#x2F;transaction&#x2F;fdb_transaction.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>fdb_transaction.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><script defer src="../../../main.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script>
-    <noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a class="sidebar-logo" href="../../../fdb/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.png" alt="logo"></div>
-        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../fdb/index.html"><img class="rust-logo" src="../../../rust-logo.png" alt="logo"></a><nav class="sub"><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `fdb/src/transaction/fdb_transaction.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>fdb_transaction.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><script defer src="../../../main.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script>
+    <noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../fdb/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div>
+        </a><h2 class="location"></h2>
+    </nav>
+    <nav class="sidebar"><a class="sidebar-logo" href="../../../fdb/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div>
+        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../fdb/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><div class="theme-picker hidden"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="22" height="22" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -819,6 +822,93 @@
 <span id="817">817</span>
 <span id="818">818</span>
 <span id="819">819</span>
+<span id="820">820</span>
+<span id="821">821</span>
+<span id="822">822</span>
+<span id="823">823</span>
+<span id="824">824</span>
+<span id="825">825</span>
+<span id="826">826</span>
+<span id="827">827</span>
+<span id="828">828</span>
+<span id="829">829</span>
+<span id="830">830</span>
+<span id="831">831</span>
+<span id="832">832</span>
+<span id="833">833</span>
+<span id="834">834</span>
+<span id="835">835</span>
+<span id="836">836</span>
+<span id="837">837</span>
+<span id="838">838</span>
+<span id="839">839</span>
+<span id="840">840</span>
+<span id="841">841</span>
+<span id="842">842</span>
+<span id="843">843</span>
+<span id="844">844</span>
+<span id="845">845</span>
+<span id="846">846</span>
+<span id="847">847</span>
+<span id="848">848</span>
+<span id="849">849</span>
+<span id="850">850</span>
+<span id="851">851</span>
+<span id="852">852</span>
+<span id="853">853</span>
+<span id="854">854</span>
+<span id="855">855</span>
+<span id="856">856</span>
+<span id="857">857</span>
+<span id="858">858</span>
+<span id="859">859</span>
+<span id="860">860</span>
+<span id="861">861</span>
+<span id="862">862</span>
+<span id="863">863</span>
+<span id="864">864</span>
+<span id="865">865</span>
+<span id="866">866</span>
+<span id="867">867</span>
+<span id="868">868</span>
+<span id="869">869</span>
+<span id="870">870</span>
+<span id="871">871</span>
+<span id="872">872</span>
+<span id="873">873</span>
+<span id="874">874</span>
+<span id="875">875</span>
+<span id="876">876</span>
+<span id="877">877</span>
+<span id="878">878</span>
+<span id="879">879</span>
+<span id="880">880</span>
+<span id="881">881</span>
+<span id="882">882</span>
+<span id="883">883</span>
+<span id="884">884</span>
+<span id="885">885</span>
+<span id="886">886</span>
+<span id="887">887</span>
+<span id="888">888</span>
+<span id="889">889</span>
+<span id="890">890</span>
+<span id="891">891</span>
+<span id="892">892</span>
+<span id="893">893</span>
+<span id="894">894</span>
+<span id="895">895</span>
+<span id="896">896</span>
+<span id="897">897</span>
+<span id="898">898</span>
+<span id="899">899</span>
+<span id="900">900</span>
+<span id="901">901</span>
+<span id="902">902</span>
+<span id="903">903</span>
+<span id="904">904</span>
+<span id="905">905</span>
+<span id="906">906</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">bytes::Bytes</span>;
 
 <span class="kw">use</span> <span class="ident">std::convert::TryInto</span>;
@@ -836,6 +926,12 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::transaction</span>::{<span class="ident">MutationType</span>, <span class="ident">ReadTransaction</span>, <span class="ident">Transaction</span>, <span class="ident">TransactionOption</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::tuple::key_util</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">Key</span>, <span class="ident">KeySelector</span>, <span class="ident">Value</span>};
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;fdb-7_1&quot;</span>)]</span>
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::future</span>::{<span class="ident">FdbFutureKeyArray</span>, <span class="ident">FdbStreamMappedKeyValue</span>};
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;fdb-7_1&quot;</span>)]</span>
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::Mapper</span>;
 
 <span class="doccomment">/// Committed version of the [`Transaction`].</span>
 <span class="doccomment">///</span>
@@ -1054,13 +1150,26 @@
     }
 
     <span class="kw">fn</span> <span class="ident">get_estimated_range_size_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">range</span>: <span class="ident">Range</span>) -&gt; <span class="ident">FdbFutureI64</span> {
-        <span class="kw">let</span> (<span class="ident">begin</span>, <span class="ident">end</span>) <span class="op">=</span> <span class="ident">range</span>.<span class="ident">deconstruct</span>();
+        <span class="kw">let</span> (<span class="ident">begin</span>, <span class="ident">end</span>) <span class="op">=</span> <span class="ident">range</span>.<span class="ident">into_parts</span>();
 
         <span class="ident">internal::read_transaction::get_estimated_range_size_bytes</span>(<span class="self">self</span>.<span class="ident">get_c_api_ptr</span>(), <span class="ident">begin</span>, <span class="ident">end</span>)
     }
 
     <span class="kw">fn</span> <span class="ident">get_key</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">selector</span>: <span class="ident">KeySelector</span>) -&gt; <span class="ident">FdbFutureKey</span> {
         <span class="ident">internal::read_transaction::get_key</span>(<span class="self">self</span>.<span class="ident">get_c_api_ptr</span>(), <span class="ident">selector</span>, <span class="bool-val">false</span>)
+    }
+
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;fdb-7_1&quot;</span>)]</span>
+    <span class="kw">fn</span> <span class="ident">get_mapped_range</span>(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        <span class="ident">begin</span>: <span class="ident">KeySelector</span>,
+        <span class="ident">end</span>: <span class="ident">KeySelector</span>,
+        <span class="ident">mapper</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Mapper</span><span class="op">&gt;</span>,
+        <span class="ident">options</span>: <span class="ident">RangeOptions</span>,
+    ) -&gt; <span class="ident">FdbStreamMappedKeyValue</span> {
+        <span class="comment">// Convert to a value `Mapper` type here as we need to</span>
+        <span class="comment">// maintain a `Mapper` in the state machine.</span>
+        <span class="ident">FdbStreamMappedKeyValue::new</span>(<span class="self">self</span>.<span class="ident">clone</span>(), <span class="ident">begin</span>, <span class="ident">end</span>, <span class="ident">mapper</span>.<span class="ident">into</span>(), <span class="ident">options</span>, <span class="bool-val">false</span>)
     }
 
     <span class="kw">fn</span> <span class="ident">get_range</span>(
@@ -1070,6 +1179,21 @@
         <span class="ident">options</span>: <span class="ident">RangeOptions</span>,
     ) -&gt; <span class="ident">FdbStreamKeyValue</span> {
         <span class="ident">FdbStreamKeyValue::new</span>(<span class="self">self</span>.<span class="ident">clone</span>(), <span class="ident">begin</span>, <span class="ident">end</span>, <span class="ident">options</span>, <span class="bool-val">false</span>)
+    }
+
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;fdb-7_1&quot;</span>)]</span>
+    <span class="kw">fn</span> <span class="ident">get_range_split_points</span>(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        <span class="ident">begin</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Key</span><span class="op">&gt;</span>,
+        <span class="ident">end</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Key</span><span class="op">&gt;</span>,
+        <span class="ident">chunk_size</span>: <span class="ident">i64</span>,
+    ) -&gt; <span class="ident">FdbFutureKeyArray</span> {
+        <span class="ident">internal::read_transaction::get_range_split_points</span>(
+            <span class="self">self</span>.<span class="ident">get_c_api_ptr</span>(),
+            <span class="ident">begin</span>,
+            <span class="ident">end</span>,
+            <span class="ident">chunk_size</span>,
+        )
     }
 
     <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">get_read_version</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">FdbFutureI64</span> {
@@ -1103,7 +1227,7 @@
     }
 
     <span class="kw">fn</span> <span class="ident">add_read_conflict_range</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">range</span>: <span class="ident">Range</span>) -&gt; <span class="ident">FdbResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">let</span> (<span class="ident">begin</span>, <span class="ident">end</span>) <span class="op">=</span> <span class="ident">range</span>.<span class="ident">deconstruct</span>();
+        <span class="kw">let</span> (<span class="ident">begin</span>, <span class="ident">end</span>) <span class="op">=</span> <span class="ident">range</span>.<span class="ident">into_parts</span>();
 
         <span class="ident">internal::transaction::add_conflict_range</span>(
             <span class="self">self</span>.<span class="ident">get_c_api_ptr</span>(),
@@ -1130,7 +1254,7 @@
     }
 
     <span class="kw">fn</span> <span class="ident">add_write_conflict_range</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">range</span>: <span class="ident">Range</span>) -&gt; <span class="ident">FdbResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">let</span> (<span class="ident">begin</span>, <span class="ident">end</span>) <span class="op">=</span> <span class="ident">range</span>.<span class="ident">deconstruct</span>();
+        <span class="kw">let</span> (<span class="ident">begin</span>, <span class="ident">end</span>) <span class="op">=</span> <span class="ident">range</span>.<span class="ident">into_parts</span>();
 
         <span class="ident">internal::transaction::add_conflict_range</span>(
             <span class="self">self</span>.<span class="ident">get_c_api_ptr</span>(),
@@ -1153,7 +1277,7 @@
     }
 
     <span class="kw">fn</span> <span class="ident">clear_range</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">range</span>: <span class="ident">Range</span>) {
-        <span class="kw">let</span> (<span class="ident">begin_key</span>, <span class="ident">end_key</span>) <span class="op">=</span> <span class="ident">range</span>.<span class="ident">deconstruct</span>();
+        <span class="kw">let</span> (<span class="ident">begin_key</span>, <span class="ident">end_key</span>) <span class="op">=</span> <span class="ident">range</span>.<span class="ident">into_parts</span>();
 
         <span class="kw">let</span> <span class="ident">bk</span> <span class="op">=</span> <span class="ident">Bytes::from</span>(<span class="ident">begin_key</span>);
         <span class="kw">let</span> <span class="ident">begin_key_name</span> <span class="op">=</span> <span class="ident">bk</span>.<span class="ident">as_ref</span>().<span class="ident">as_ptr</span>();
@@ -1339,7 +1463,7 @@
     }
 
     <span class="kw">fn</span> <span class="ident">get_addresses_for_key</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Key</span><span class="op">&gt;</span>) -&gt; <span class="ident">FdbFutureCStringArray</span> {
-        <span class="ident">internal::read_transaction::get_addresses_for_key</span>(<span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">get_c_api_ptr</span>(), <span class="ident">key</span>)
+        <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">get_addresses_for_key</span>(<span class="ident">key</span>)
     }
 
     <span class="kw">fn</span> <span class="ident">get_estimated_range_size_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">range</span>: <span class="ident">Range</span>) -&gt; <span class="ident">FdbFutureI64</span> {
@@ -1350,6 +1474,19 @@
         <span class="ident">internal::read_transaction::get_key</span>(<span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">get_c_api_ptr</span>(), <span class="ident">selector</span>, <span class="bool-val">true</span>)
     }
 
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;fdb-7_1&quot;</span>)]</span>
+    <span class="kw">fn</span> <span class="ident">get_mapped_range</span>(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        <span class="ident">begin</span>: <span class="ident">KeySelector</span>,
+        <span class="ident">end</span>: <span class="ident">KeySelector</span>,
+        <span class="ident">mapper</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Mapper</span><span class="op">&gt;</span>,
+        <span class="ident">options</span>: <span class="ident">RangeOptions</span>,
+    ) -&gt; <span class="ident">FdbStreamMappedKeyValue</span> {
+        <span class="comment">// Convert to a value `Mapper` type here as we need to</span>
+        <span class="comment">// maintain a `Mapper` in the state machine.</span>
+        <span class="ident">FdbStreamMappedKeyValue::new</span>(<span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">clone</span>(), <span class="ident">begin</span>, <span class="ident">end</span>, <span class="ident">mapper</span>.<span class="ident">into</span>(), <span class="ident">options</span>, <span class="bool-val">true</span>)
+    }
+
     <span class="kw">fn</span> <span class="ident">get_range</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">begin</span>: <span class="ident">KeySelector</span>,
@@ -1357,6 +1494,16 @@
         <span class="ident">options</span>: <span class="ident">RangeOptions</span>,
     ) -&gt; <span class="ident">FdbStreamKeyValue</span> {
         <span class="ident">FdbStreamKeyValue::new</span>(<span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">clone</span>(), <span class="ident">begin</span>, <span class="ident">end</span>, <span class="ident">options</span>, <span class="bool-val">true</span>)
+    }
+
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;fdb-7_1&quot;</span>)]</span>
+    <span class="kw">fn</span> <span class="ident">get_range_split_points</span>(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        <span class="ident">begin</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Key</span><span class="op">&gt;</span>,
+        <span class="ident">end</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Key</span><span class="op">&gt;</span>,
+        <span class="ident">chunk_size</span>: <span class="ident">i64</span>,
+    ) -&gt; <span class="ident">FdbFutureKeyArray</span> {
+        <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">get_range_split_points</span>(<span class="ident">begin</span>, <span class="ident">end</span>, <span class="ident">chunk_size</span>)
     }
 
     <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">get_read_version</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">FdbFutureI64</span> {
@@ -1421,6 +1568,9 @@
         <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::transaction::TransactionOption</span>;
         <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">Key</span>, <span class="ident">KeySelector</span>};
 
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;fdb-7_1&quot;</span>)]</span>
+        <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::future::FdbFutureKeyArray</span>;
+
         <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">get</span>(
             <span class="ident">transaction</span>: <span class="kw-2">*mut</span> <span class="ident">fdb_sys::FDBTransaction</span>,
             <span class="ident">key</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Key</span><span class="op">&gt;</span>,
@@ -1482,11 +1632,11 @@
             <span class="ident">selector</span>: <span class="ident">KeySelector</span>,
             <span class="ident">snapshot</span>: <span class="ident">bool</span>,
         ) -&gt; <span class="ident">FdbFutureKey</span> {
-            <span class="kw">let</span> <span class="ident">k</span> <span class="op">=</span> <span class="ident">Bytes::from</span>(<span class="ident">selector</span>.<span class="ident">get_key</span>().<span class="ident">clone</span>());
+            <span class="kw">let</span> (<span class="ident">key</span>, <span class="ident">or_equal</span>, <span class="ident">offset</span>) <span class="op">=</span> <span class="ident">selector</span>.<span class="ident">deconstruct</span>();
+            <span class="kw">let</span> <span class="ident">k</span> <span class="op">=</span> <span class="ident">Bytes::from</span>(<span class="ident">key</span>);
             <span class="kw">let</span> <span class="ident">key_name</span> <span class="op">=</span> <span class="ident">k</span>.<span class="ident">as_ref</span>().<span class="ident">as_ptr</span>();
             <span class="kw">let</span> <span class="ident">key_name_length</span> <span class="op">=</span> <span class="ident">k</span>.<span class="ident">as_ref</span>().<span class="ident">len</span>().<span class="ident">try_into</span>().<span class="ident">unwrap</span>();
-            <span class="kw">let</span> <span class="ident">or_equal</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">selector</span>.<span class="ident">or_equal</span>() { <span class="number">1</span> } <span class="kw">else</span> { <span class="number">0</span> };
-            <span class="kw">let</span> <span class="ident">offset</span> <span class="op">=</span> <span class="ident">selector</span>.<span class="ident">get_offset</span>();
+            <span class="kw">let</span> <span class="ident">or_equal</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">or_equal</span> { <span class="number">1</span> } <span class="kw">else</span> { <span class="number">0</span> };
 
             <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">snapshot</span> { <span class="number">1</span> } <span class="kw">else</span> { <span class="number">0</span> };
 
@@ -1498,6 +1648,33 @@
                     <span class="ident">or_equal</span>,
                     <span class="ident">offset</span>,
                     <span class="ident">s</span>,
+                )
+            })
+        }
+
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;fdb-7_1&quot;</span>)]</span>
+        <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">get_range_split_points</span>(
+            <span class="ident">transaction</span>: <span class="kw-2">*mut</span> <span class="ident">fdb_sys::FDBTransaction</span>,
+            <span class="ident">begin_key</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Key</span><span class="op">&gt;</span>,
+            <span class="ident">end_key</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Key</span><span class="op">&gt;</span>,
+            <span class="ident">chunk_size</span>: <span class="ident">i64</span>,
+        ) -&gt; <span class="ident">FdbFutureKeyArray</span> {
+            <span class="kw">let</span> <span class="ident">bk</span> <span class="op">=</span> <span class="ident">Bytes::from</span>(<span class="ident">begin_key</span>.<span class="ident">into</span>());
+            <span class="kw">let</span> <span class="ident">begin_key_name</span> <span class="op">=</span> <span class="ident">bk</span>.<span class="ident">as_ref</span>().<span class="ident">as_ptr</span>();
+            <span class="kw">let</span> <span class="ident">begin_key_name_length</span> <span class="op">=</span> <span class="ident">bk</span>.<span class="ident">as_ref</span>().<span class="ident">len</span>().<span class="ident">try_into</span>().<span class="ident">unwrap</span>();
+
+            <span class="kw">let</span> <span class="ident">ek</span> <span class="op">=</span> <span class="ident">Bytes::from</span>(<span class="ident">end_key</span>.<span class="ident">into</span>());
+            <span class="kw">let</span> <span class="ident">end_key_name</span> <span class="op">=</span> <span class="ident">ek</span>.<span class="ident">as_ref</span>().<span class="ident">as_ptr</span>();
+            <span class="kw">let</span> <span class="ident">end_key_name_length</span> <span class="op">=</span> <span class="ident">ek</span>.<span class="ident">as_ref</span>().<span class="ident">len</span>().<span class="ident">try_into</span>().<span class="ident">unwrap</span>();
+
+            <span class="ident">FdbFuture::new</span>(<span class="kw">unsafe</span> {
+                <span class="ident">fdb_sys::fdb_transaction_get_range_split_points</span>(
+                    <span class="ident">transaction</span>,
+                    <span class="ident">begin_key_name</span>,
+                    <span class="ident">begin_key_name_length</span>,
+                    <span class="ident">end_key_name</span>,
+                    <span class="ident">end_key_name_length</span>,
+                    <span class="ident">chunk_size</span>,
                 )
             })
         }
@@ -1639,5 +1816,5 @@
     }
 }
 </code></pre></div>
-</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="fdb" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.59.0 (9d1b2106e 2022-02-23)" ></div>
+</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="fdb" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.60.0 (7737e0b5c 2022-04-04)" ></div>
 </body></html>
