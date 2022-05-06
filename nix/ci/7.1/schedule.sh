@@ -25,7 +25,7 @@ pip install foundationdb==7.1.3
 # finish the run.
 
 START=1
-END=400
+END=100
 
 for i in $(eval echo "{$START..$END}")
 do
