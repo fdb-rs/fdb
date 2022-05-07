@@ -14,7 +14,7 @@ keywords = ["foundationdb", "tokio"]
 categories = ["api-bindings", "database"]
 
 [package.metadata.docs.rs]
-features = ["fdb-6_3"]
+features = ["fdb-7_1"]
 
 [features]
 default = []
