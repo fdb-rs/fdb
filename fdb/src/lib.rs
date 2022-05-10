@@ -11,6 +11,25 @@
 //! level documentation here.
 //!
 //! [website]: https://fdb-rs.github.io/docs/getting-started/introduction/
+//!
+//! A minimal example to get started
+//!
+//! ```no_run
+//! #[tokio::main]
+//! async fn main() {
+//!   unsafe {
+//!       fdb::select_api_version(fdb::FDB_API_VERSION as _);
+//!       fdb::start_network();
+//!   }
+//!   let db = fdb::open_database("").expect("Open database");
+//!
+//!   // Use db
+//!
+//!   drop(db);
+//!   unsafe {
+//!       fdb::stop_network();
+//!   }
+//! }
 
 mod fdb;
 mod key_value;
