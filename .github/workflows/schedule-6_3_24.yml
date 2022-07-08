@@ -2,7 +2,7 @@ name: schedule-6_3_24
 
 env:
   image_version: 6_3_24
-  image_tag: 3faa15b369a0
+  image_tag: a941c67da0e8
 
 # We adjust the number of iterations in `schedule.sh` so that the job
 # takes approximately 1 hour to finish. Jobs are scheduled at minute

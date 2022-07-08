@@ -6,11 +6,11 @@
 stdenv.mkDerivation rec {
   pname = "cargo-llvm-cov";
 
-  version = "0.3.1";
+  version = "0.4.9";
 
   src = fetchurl {
     url = "https://github.com/taiki-e/cargo-llvm-cov/releases/download/v${version}/cargo-llvm-cov-x86_64-unknown-linux-gnu.tar.gz";
-    sha256 = "sha256-IeAHM2le6cjGbU13Jk4OkuCDDZ7wPxmjIZh5ko7vlis=";
+    sha256 = "sha256-Gg24R33D1IrG0jX35FyD4sz5vJlpEyrY7Zzo9FKEW+A=";
   };
 
   unpackPhase = ":";

@@ -953,7 +953,7 @@ impl StackMachine {
                     for ti in 0..packed_tuple.size() {
                         let mut res = Tuple::new();
 
-                        let _ = packed_tuple
+                        packed_tuple
                             .get_bigint(ti)
                             .map(|bi| res.add_bigint(bi))
                             .or_else(|_| packed_tuple.get_bool(ti).map(|b| res.add_bool(b)))
@@ -2328,7 +2328,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
         // Ensure that start thread task successfully exits. This
         // happens when there are no more active threads.
-        let _ = start_thread_task_join_handle.await?;
+        start_thread_task_join_handle.await?;
 
         Result::<(), Box<dyn Error>>::Ok(())
     })?;

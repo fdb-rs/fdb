@@ -1,7 +1,7 @@
 {
   description = "CI Nix flakes";
 
-  inputs.nixpkgs.url = "nixpkgs/nixos-21.11";
+  inputs.nixpkgs.url = "nixpkgs/nixos-22.05";
 
   inputs.rust-overlay.url = "github:oxalica/rust-overlay";
 
@@ -88,6 +88,8 @@
 
           chown fdb:fdb /opt/fdb/data
           chown fdb:fdb /opt/fdb/log
+
+          mkdir -p /nix/var/nix/daemon-socket
 
           systemctl enable fdbcli.service
           systemctl enable foundationdb.service
@@ -232,7 +234,7 @@
         '';
       };
 
-    fdb-7_1_3 =
+    fdb-7_1_12 =
       let
         pkgs = import nixpkgs {
           system = "x86_64-linux";
@@ -252,13 +254,13 @@
 
         fdb = import ./fdb-7.1 { inherit pkgs; };
 
-        fdb-files = pkgs.callPackage ./fdb-files-7.1 { version = "7.1.3"; };
+        fdb-files = pkgs.callPackage ./fdb-files-7.1 { version = "7.1.12"; };
 
         fdb-systemd-units = builtins.attrValues fdb-files.systemd_units;
       in
       with pkgs;
       dockerTools.buildImageWithNixDb {
-        name = "fdb-7_1_3";
+        name = "fdb-7_1_12";
         tag = "latest";
 
         contents = [
@@ -315,6 +317,8 @@
           chown fdb:fdb /opt/fdb/data
           chown fdb:fdb /opt/fdb/log
 
+          mkdir -p /nix/var/nix/daemon-socket
+
           systemctl enable fdbcli.service
           systemctl enable foundationdb.service
           systemctl enable nix-daemon.socket
@@ -333,7 +337,7 @@
     # limitation around `+nightly`. `+nightly` is needed by
     # `cargo-llvm-cov`.
 
-    pull_request-7_1_3 =
+    pull_request-7_1_12 =
       let
         overlays = [ (import rust-overlay) ];
 
@@ -376,7 +380,7 @@
         '';
       };
 
-    pull_request-nightly-7_1_3 =
+    pull_request-nightly-7_1_12 =
       let
         overlays = [ (import rust-overlay) ];
 
@@ -397,7 +401,7 @@
           llvmPackages.libcxxClang
           openssl
           pkgconfig
-          (rust-bin.nightly."2022-05-04".default.override {
+          (rust-bin.nightly."2022-07-10".default.override {
             extensions = [
               "llvm-tools-preview"
             ];
@@ -413,7 +417,7 @@
         RUSTC_LINK_SEARCH_FDB_CLIENT_LIB = "/opt/fdb/client-lib";
       };
 
-    push-7_1_3 =
+    push-7_1_12 =
       let
         overlays = [ (import rust-overlay) ];
 
@@ -456,7 +460,7 @@
         '';
       };
 
-    push-nightly-7_1_3 =
+    push-nightly-7_1_12 =
       let
         overlays = [ (import rust-overlay) ];
 
@@ -493,7 +497,7 @@
         RUSTC_LINK_SEARCH_FDB_CLIENT_LIB = "/opt/fdb/client-lib";
       };
 
-    push_rustdoc-7_1_3 =
+    push_rustdoc-7_1_12 =
       let
         overlays = [ (import rust-overlay) ];
 
@@ -522,7 +526,7 @@
         RUSTC_LINK_SEARCH_FDB_CLIENT_LIB = "/opt/fdb/client-lib";
       };
 
-    schedule-7_1_3 =
+    schedule-7_1_12 =
       let
         overlays = [ (import rust-overlay) ];
 

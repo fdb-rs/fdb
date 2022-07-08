@@ -1,8 +1,8 @@
-name: pull_request-7_1_3
+name: pull_request-7_1_12
 
 env:
-  image_version: 7_1_3
-  image_tag: 3205cb0f188a
+  image_version: 7_1_12
+  image_tag: c72739bee1a9
 
 on:
   pull_request:
@@ -25,11 +25,11 @@ jobs:
       -
         name: Run 7.1/pull_request.sh
         run: |
-          sudo podman exec --user runner:docker --workdir /home/runner/fdb/nix/ci --tty fdb nix develop .#pull_request-7_1_3 --command ./7.1/pull_request.sh
+          sudo podman exec --user runner:docker --workdir /home/runner/fdb/nix/ci --tty fdb nix develop .#pull_request-7_1_12 --command ./7.1/pull_request.sh
       -
         name: Run 7.1/pull_request_lcov.sh
         run: |
-          sudo podman exec --user runner:docker --workdir /home/runner/fdb/nix/ci --tty fdb nix develop .#pull_request-nightly-7_1_3 --command ./7.1/pull_request_lcov.sh
+          sudo podman exec --user runner:docker --workdir /home/runner/fdb/nix/ci --tty fdb nix develop .#pull_request-nightly-7_1_12 --command ./7.1/pull_request_lcov.sh
       -
         name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1

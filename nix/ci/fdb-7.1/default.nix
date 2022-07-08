@@ -34,8 +34,8 @@ in
 [
   (
     let
-      version = "7.1.3";
-      sha256 = "sha256-kXCqh5vinx7EwpWKEvQ77lmy1OVODcOd23GPD/RY2jk=";
+      version = "7.1.12";
+      sha256 = "sha256-5KeYLcy22eYWuQVUMIlrAP90h0crAzvkrcl/ADZ5yCE=";
       isDir = false;
 
       fdb-client-lib = pkgs.callPackage ./client-lib { inherit version sha256 isDir; };
@@ -45,8 +45,8 @@ in
 
   (
     let
-      version = "7.1.3";
-      sha256 = "sha256-kXCqh5vinx7EwpWKEvQ77lmy1OVODcOd23GPD/RY2jk=";
+      version = "7.1.12";
+      sha256 = "sha256-5KeYLcy22eYWuQVUMIlrAP90h0crAzvkrcl/ADZ5yCE=";
       isDir = true;
 
       fdb-client-lib-dir = pkgs.callPackage ./client-lib { inherit version sha256 isDir; };
@@ -57,8 +57,8 @@ in
   (
     let
       name = "monitor";
-      sha256 = "sha256-67qgMHUa0giGs8KvahvKHtgk0ZQz7QpoDtiRPMM+JD8=";
-      version = "7.1.3";
+      version = "7.1.12";
+      sha256 = "sha256-meuNIjt6xhkuTM1AiF8fvtFM2SnM16MutNPsHH58gz8=";
 
       fdb-monitor = pkgs.callPackage ./app { inherit name sha256 version; };
     in
@@ -68,8 +68,8 @@ in
   (
     let
       name = "server";
-      sha256 = "sha256-SmlBVss1hPyr1NHIyW1ld6W6JCvVMsc6AWvYUydGUwA=";
-      version = "7.1.3";
+      version = "7.1.12";
+      sha256 = "sha256-FQzCcIAeFLfGszkJ61BJqYRlq2ev/fMxA93Lz6qkRJg=";
 
       fdb-server = pkgs.callPackage ./app { inherit name sha256 version; };
     in
@@ -79,8 +79,8 @@ in
   (
     let
       name = "cli";
-      sha256 = "sha256-6ZZvcZlRTC6yWZW3gbncChYzxC+iRHGCgLovIGeBcvo=";
-      version = "7.1.3";
+      version = "7.1.12";
+      sha256 = "sha256-JGHdRcAXii+hiOamrmy6GA5LG4a4aCfbF4o1LoHC4p0=";
 
       fdb-cli = pkgs.callPackage ./app { inherit name sha256 version; };
     in

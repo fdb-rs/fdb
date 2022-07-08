@@ -2,7 +2,7 @@ name: pull_request-6_3_24
 
 env:
   image_version: 6_3_24
-  image_tag: 3faa15b369a0
+  image_tag: a941c67da0e8
 
 on:
   pull_request:

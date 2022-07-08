@@ -1,8 +1,8 @@
-name: push-rustdoc-7_1_3
+name: push-rustdoc-7_1_12
 
 env:
-  image_version: 7_1_3
-  image_tag: 3205cb0f188a
+  image_version: 7_1_12
+  image_tag: c72739bee1a9
 
 on:
   push:
@@ -25,7 +25,7 @@ jobs:
       -
         name: Run 7.1/push_rustdoc.sh
         run: |
-          sudo podman exec --user runner:docker --workdir /home/runner/fdb/nix/ci --tty fdb nix develop .#push_rustdoc-7_1_3 --command ./7.1/push_rustdoc.sh
+          sudo podman exec --user runner:docker --workdir /home/runner/fdb/nix/ci --tty fdb nix develop .#push_rustdoc-7_1_12 --command ./7.1/push_rustdoc.sh
       -
         name: Deploy docs
         uses: peaceiris/actions-gh-pages@v3
