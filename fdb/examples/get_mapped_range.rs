@@ -230,7 +230,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         // Records with primary key of 0..=4 will be inserted.
         insert_record_with_indexes(5, &fdb_database).await?;
 
-        let _ = fdb_database
+        fdb_database
             .run(|tr| async move {
                 // Get mapped key values from 1..=3.
                 let mut mapped_range_stream = Range::new(index_entry_key(1), index_entry_key(4))

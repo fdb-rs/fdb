@@ -1,8 +1,8 @@
-name: schedule-7_1_3
+name: schedule-7_1_12
 
 env:
-  image_version: 7_1_3
-  image_tag: 3205cb0f188a
+  image_version: 7_1_12
+  image_tag: c72739bee1a9
 
 # We adjust the number of iterations in `schedule.sh` so that the job
 # takes approximately 1 hour to finish. Jobs are scheduled at minute
@@ -28,7 +28,7 @@ jobs:
       -
         name: Run 7.1/schedule.sh
         run: |
-          sudo podman exec --user runner:docker --workdir /home/runner/fdb/nix/ci --tty fdb nix develop .#schedule-7_1_3 --command ./7.1/schedule.sh
+          sudo podman exec --user runner:docker --workdir /home/runner/fdb/nix/ci --tty fdb nix develop .#schedule-7_1_12 --command ./7.1/schedule.sh
       -
         name: Stop container
         run: |
