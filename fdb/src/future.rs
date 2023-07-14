@@ -228,19 +228,43 @@ where
     }
 }
 
+/// Prevent users from implementing private trait.
+mod private {
+    use std::ffi::CString;
+
+    use crate::range::KeyValueArray;
+    use crate::{Key, Value};
+
+    #[cfg(feature = "fdb-7_1")]
+    use crate::mapped_range::MappedKeyValueArray;
+
+    pub trait Sealed {}
+
+    impl Sealed for () {}
+    impl Sealed for i64 {}
+    impl Sealed for Option<Value> {}
+    impl Sealed for Vec<CString> {}
+    impl Sealed for Vec<Key> {}
+
+    impl Sealed for Key {}
+    impl Sealed for MappedKeyValueArray {}
+    impl Sealed for KeyValueArray {}
+}
+
 /// Extracts value that are owned by [`FdbFuture`].
 ///
 /// # Note
 ///
 /// You will not directly use this trait. It is used by
 /// [`Future::poll`] method on [`FdbFuture`].
-pub trait FdbFutureGet {
+pub trait FdbFutureGet: private::Sealed {
     /// Extract value that are owned by [`FdbFuture`].
     ///
     /// # Safety
     ///
     /// The caller is responsible for making sure that the pointer
     /// `future` is a valid.
+    #[doc(hidden)]
     unsafe fn get(future: *mut fdb_sys::FDBFuture) -> FdbResult<Self>
     where
         Self: Sized;
@@ -375,9 +399,11 @@ impl FdbFutureGet for Vec<Key> {
             (0..out_count).into_iter().for_each(|i| {
                 let k = out_key_array.offset(i.try_into().unwrap());
 
+                let k_unaligned_deref = ptr::read_unaligned(k);
+
                 let key = Bytes::copy_from_slice(slice::from_raw_parts(
-                    (*k).key,
-                    (*k).key_length.try_into().unwrap(),
+                    k_unaligned_deref.key,
+                    k_unaligned_deref.key_length.try_into().unwrap(),
                 ))
                 .into();
 
@@ -409,17 +435,17 @@ impl FdbFutureGet for KeyValueArray {
             (0..out_count).into_iter().for_each(|i| {
                 let kv = out_kv.offset(i.try_into().unwrap());
 
-                let key = Bytes::copy_from_slice(slice::from_raw_parts(
-                    (*kv).key,
-                    (*kv).key_length.try_into().unwrap(),
-                ))
-                .into();
+                let kv_unaligned_deref = ptr::read_unaligned(kv);
 
-                let value = Bytes::copy_from_slice(slice::from_raw_parts(
-                    (*kv).value,
-                    (*kv).value_length.try_into().unwrap(),
-                ))
-                .into();
+                let key = Key::from(Bytes::copy_from_slice(slice::from_raw_parts(
+                    kv_unaligned_deref.key,
+                    kv_unaligned_deref.key_length.try_into().unwrap(),
+                )));
+
+                let value = Value::from(Bytes::copy_from_slice(slice::from_raw_parts(
+                    kv_unaligned_deref.value,
+                    kv_unaligned_deref.value_length.try_into().unwrap(),
+                )));
 
                 kvs.push(KeyValue::new(key, value));
             });
@@ -452,31 +478,43 @@ impl FdbFutureGet for MappedKeyValueArray {
             (0..out_count).into_iter().for_each(|i| {
                 let mkv = out_mkv.offset(i.try_into().unwrap());
 
-                let key_value = {
-                    let key = Bytes::copy_from_slice(slice::from_raw_parts(
-                        (*mkv).key.key,
-                        (*mkv).key.key_length.try_into().unwrap(),
-                    ))
-                    .into();
+                let mkv_unaligned_deref = ptr::read_unaligned(mkv);
 
-                    let value = Bytes::copy_from_slice(slice::from_raw_parts(
-                        (*mkv).value.key,
-                        (*mkv).value.key_length.try_into().unwrap(),
-                    ))
-                    .into();
+                let key_value = {
+                    let key = Key::from(Bytes::copy_from_slice(slice::from_raw_parts(
+                        mkv_unaligned_deref.key.key,
+                        mkv_unaligned_deref.key.key_length.try_into().unwrap(),
+                    )));
+
+                    let value = Value::from(Bytes::copy_from_slice(slice::from_raw_parts(
+                        mkv_unaligned_deref.value.key,
+                        mkv_unaligned_deref.value.key_length.try_into().unwrap(),
+                    )));
 
                     KeyValue::new(key, value)
                 };
 
                 let range = {
                     let begin = Bytes::copy_from_slice(slice::from_raw_parts(
-                        (*mkv).getRange.begin.key.key,
-                        (*mkv).getRange.begin.key.key_length.try_into().unwrap(),
+                        mkv_unaligned_deref.getRange.begin.key.key,
+                        mkv_unaligned_deref
+                            .getRange
+                            .begin
+                            .key
+                            .key_length
+                            .try_into()
+                            .unwrap(),
                     ));
 
                     let end = Bytes::copy_from_slice(slice::from_raw_parts(
-                        (*mkv).getRange.end.key.key,
-                        (*mkv).getRange.end.key.key_length.try_into().unwrap(),
+                        mkv_unaligned_deref.getRange.end.key.key,
+                        mkv_unaligned_deref
+                            .getRange
+                            .end
+                            .key
+                            .key_length
+                            .try_into()
+                            .unwrap(),
                     ));
 
                     Range::new(begin, end)
@@ -485,24 +523,27 @@ impl FdbFutureGet for MappedKeyValueArray {
                 // Referred to as `kvm_count` in Java binding [1].
                 //
                 // [1]: https://github.com/apple/foundationdb/blob/7.1.1/bindings/java/fdbJNI.cpp#L534
-                let range_result_count = (*mkv).getRange.m_size;
+                let range_result_count = mkv_unaligned_deref.getRange.m_size;
 
                 let mut range_result = Vec::with_capacity(range_result_count.try_into().unwrap());
 
                 (0..range_result_count).into_iter().for_each(|j| {
-                    let kv = (*mkv).getRange.data.offset(j.try_into().unwrap());
+                    let kv = mkv_unaligned_deref
+                        .getRange
+                        .data
+                        .offset(j.try_into().unwrap());
 
-                    let key = Bytes::copy_from_slice(slice::from_raw_parts(
-                        (*kv).key,
-                        (*kv).key_length.try_into().unwrap(),
-                    ))
-                    .into();
+                    let kv_unaligned_deref = ptr::read_unaligned(kv);
 
-                    let value = Bytes::copy_from_slice(slice::from_raw_parts(
-                        (*kv).value,
-                        (*kv).value_length.try_into().unwrap(),
-                    ))
-                    .into();
+                    let key = Key::from(Bytes::copy_from_slice(slice::from_raw_parts(
+                        kv_unaligned_deref.key,
+                        kv_unaligned_deref.key_length.try_into().unwrap(),
+                    )));
+
+                    let value = Value::from(Bytes::copy_from_slice(slice::from_raw_parts(
+                        kv_unaligned_deref.value,
+                        kv_unaligned_deref.value_length.try_into().unwrap(),
+                    )));
 
                     range_result.push(KeyValue::new(key, value));
                 });
